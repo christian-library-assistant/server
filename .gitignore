@@ -1,0 +1,9 @@
+.cursorignore
+.env
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env.local
+.pycache/
+__pycache__/

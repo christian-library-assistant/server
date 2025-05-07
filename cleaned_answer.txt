@@ -1,0 +1,15 @@
+=============== RAW GEMINI RESPONSE ===============
+```json
+{
+  "answer": "It's nice to meet you, Jeton!",
+  "sources": []
+}
+```
+
+=============== END RAW RESPONSE ===============
+
+Response starts with: ```json {   "answer": "It's nice to meet you, Jeto...
+Response ends with: ...s nice to meet you, Jeton!",   "sources": [] } ```
+Response length: 76 characters
+Contains JSON-like braces: True
+

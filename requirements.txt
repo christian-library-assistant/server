@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+python-dotenv
+anthropic
+requests
+pydantic
+typing
+google-generative-ai>=1.10.0
