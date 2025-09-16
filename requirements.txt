@@ -5,4 +5,4 @@ anthropic
 requests
 pydantic
 typing
-google-generative-ai>=1.10.0
+google-genai>=1.10.0
