@@ -3,9 +3,14 @@ import logging
 from typing import List, Dict, Any, Optional
 
 from .base import AIClient
+from ...config.settings import IS_DEVELOPMENT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+# Only set debug level in development
+if IS_DEVELOPMENT:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.WARNING)
 
 
 class AnthropicClient(AIClient):

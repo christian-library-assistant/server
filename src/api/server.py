@@ -3,16 +3,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .endpoints import router
-from ..config.settings import ANTHROPIC_API_KEY
+from ..config.settings import ANTHROPIC_API_KEY, IS_DEVELOPMENT
 from ..infrastructure.ai_clients.anthropic import AnthropicClient
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
-    app = FastAPI(title="Smart Library Assistant API", debug=True)
+    # Set debug mode based on environment
+    app = FastAPI(
+        title="Smart Library Assistant API", 
+        debug=IS_DEVELOPMENT
+    )
 
     # Add CORS middleware
     app.add_middleware(
@@ -24,6 +27,9 @@ def create_app() -> FastAPI:
     )
 
     # Initialize AI client
+    if not ANTHROPIC_API_KEY:
+        raise ValueError("ANTHROPIC_API_KEY is required but not set")
+    
     anthropic_client = AnthropicClient(api_key=ANTHROPIC_API_KEY)
 
     # Store the client in app state for dependency injection
