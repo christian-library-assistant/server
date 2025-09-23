@@ -14,6 +14,7 @@ class AIClient(ABC):
         self,
         system_prompt: str,
         user_prompt: str,
+        user_query: str,
         conversation_history: Optional[List[Dict[str, str]]] = None
     ) -> Dict[str, Any]:
         """
@@ -21,7 +22,8 @@ class AIClient(ABC):
 
         Args:
             system_prompt: System prompt to guide the model
-            user_prompt: User's prompt/query
+            user_prompt: Full prompt with context for the model
+            user_query: Clean user query for conversation history
             conversation_history: Previous conversation history
 
         Returns:
