@@ -7,3 +7,7 @@ venv/
 .env.local
 .pycache/
 __pycache__/
+.cursorignore
+cleaned_answer.txt
+data/
+.claude

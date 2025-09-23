@@ -27,7 +27,7 @@ logger.setLevel(logging.DEBUG)
 class GeminiClient(AIClient):
     """Google Gemini AI client implementation."""
 
-    def __init__(self, api_key: str, model_id: str = "gemini-2.5-flash-preview-04-17"):
+    def __init__(self, api_key: str, model_id: str = "gemini-2.5-flash"):
         """
         Initialize the Gemini AI client.
 
@@ -43,6 +43,7 @@ class GeminiClient(AIClient):
         self,
         system_prompt: str,
         user_prompt: str,
+        user_query: str,
         conversation_history: Optional[List[Dict[str, str]]] = None,
         thinking_budget: int = 5000
     ) -> Dict[str, Any]:
@@ -51,7 +52,8 @@ class GeminiClient(AIClient):
 
         Args:
             system_prompt: System prompt to guide the model
-            user_prompt: User's prompt/query
+            user_prompt: Full prompt with context for the model
+            user_query: Clean user query for conversation history
             conversation_history: Previous conversation history
             thinking_budget: Token budget for thinking process
 
@@ -71,15 +73,15 @@ class GeminiClient(AIClient):
                     if "CONTEXT:" in user_content and "QUESTION:" in user_content:
                         user_content = user_content.split("QUESTION:")[-1].strip()
 
-                    messages.append(types.Part.from_text(user_content))
+                    messages.append(types.Part(text=user_content))
                     logger.debug(f"Added user message: {user_content[:50]}...")
                 else:
                     # Keep assistant messages as they are
-                    messages.append(types.Part.from_text(msg["content"]))
+                    messages.append(types.Part(text=msg["content"]))
                     logger.debug(f"Added assistant message: {msg['content'][:50]}...")
 
         # Add the current user prompt
-        messages.append(types.Part.from_text(user_prompt))
+        messages.append(types.Part(text=user_prompt))
         logger.debug(f"Added current user prompt (length: {len(user_prompt)})")
 
         # Configure generation parameters
