@@ -2,9 +2,14 @@ import json
 import logging
 import re
 from typing import List, Tuple, Dict, Any
+from ...config.settings import IS_DEVELOPMENT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+# Only set debug level in development
+if IS_DEVELOPMENT:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.WARNING)
 
 
 def generate_ccel_url(source_id: str) -> str | None:

@@ -9,12 +9,16 @@ from ..core.agents.session_manager import AgentSessionManager
 from ..core.services.rag_service import RegularRAGService
 from ..core.services.agent_service import AgentRAGService
 from ..core.services.test_service import TestService
-from ..config.settings import MANTICORE_API_URL
+from ..config.settings import MANTICORE_API_URL, IS_DEVELOPMENT
 
 import requests
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+# Only set debug level in development
+if IS_DEVELOPMENT:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.WARNING)
 
 router = APIRouter()
 
