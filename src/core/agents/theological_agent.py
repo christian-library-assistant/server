@@ -17,6 +17,7 @@ from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from pydantic import SecretStr
 
 from ..tools.manticore_tool import search_ccel_database, get_ccel_source_details
+from ..tools.author_works_tools import search_ccel_authors, search_ccel_works
 from ...config.settings import ANTHROPIC_API_KEY
 from ...prompts.agent_prompts import THEOLOGICAL_AGENT_PROMPT_TEMPLATE
 
@@ -53,8 +54,13 @@ class TheologicalAgent:
             api_key=SecretStr(ANTHROPIC_API_KEY)
         )
 
-        # Define available tools #TODO: Add the bible verse tool and the web_search_tool. 
-        self.tools = [search_ccel_database, get_ccel_source_details]
+        # Define available tools #TODO: Add the bible verse tool and the web_search_tool.
+        self.tools = [
+            search_ccel_database,
+            search_ccel_authors,
+            search_ccel_works,
+            get_ccel_source_details
+        ]
 
         # Create custom prompt for theological reasoning
         self.prompt_template = self._create_prompt_template()
@@ -78,7 +84,7 @@ class TheologicalAgent:
             verbose=True,
             memory=self.memory,
             max_iterations=5,
-            early_stopping_method="generate",
+            early_stopping_method="force",
             handle_parsing_errors=True
         )
 
@@ -148,6 +154,7 @@ class TheologicalAgent:
     def _extract_sources_from_tool_usage(self, intermediate_steps: List, answer: str) -> List[Dict[str, str]]:
         """
         Extract sources from actual tool usage in agent iterations.
+        Returns record IDs only - links will be generated later by SourceFormatter.
         """
         sources = []
 
@@ -172,8 +179,8 @@ class TheologicalAgent:
                             if record_id:
                                 sources.append({
                                     "citation": f"CCEL Record {record_id}",
-                                    "record_id": record_id,
-                                    "link": f"https://www.ccel.org/ccel/{record_id}"
+                                    "record_id": record_id
+                                    # Note: No link generation here - SourceFormatter will handle this
                                 })
                     except Exception as e:
                         logger.error(f"Error extracting sources from tool usage: {e}")

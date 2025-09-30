@@ -4,6 +4,7 @@ using the Manticore search service.
 """
 
 import logging
+from typing import List, Optional
 from langchain.tools import tool
 
 from ...infrastructure.search.manticore import get_paragraphs
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 @tool
-def search_ccel_database(query: str) -> str:
+def search_ccel_database(query: str, authors: str = "", works: str = "") -> str:
     """
     Searches the Christian Classics Ethereal Library (CCEL) database to find
     theological and historical Christian texts related to the query.
@@ -23,8 +24,14 @@ def search_ccel_database(query: str) -> str:
     or references from classical Christian authors like Augustine, Aquinas,
     Calvin, Luther, Chrysostom, etc.
 
+    You can optionally filter results by specific authors or works. Use the
+    search_ccel_authors and search_ccel_works tools first to find the correct
+    author and work IDs, then pass them to this function.
+
     Args:
         query: The theological question or topic to search for
+        authors: Comma-separated list of author IDs to filter by (e.g., "augustine,aquinas")
+        works: Comma-separated list of work IDs to filter by (e.g., "confessions,city")
 
     Returns:
         Formatted search results with relevant passages and source information
@@ -32,8 +39,21 @@ def search_ccel_database(query: str) -> str:
     try:
         logger.debug(f"Searching CCEL database for: {query}")
 
-        # Create UserQuery object for the existing service
-        user_query = UserQuery(query=query, top_k=5)
+        # Parse comma-separated filters
+        authors_filter = [a.strip() for a in authors.split(",") if a.strip()] if authors else []
+        works_filter = [w.strip() for w in works.split(",") if w.strip()] if works else []
+
+        # Create UserQuery object with filters
+        user_query = UserQuery(
+            query=query,
+            top_k=5,
+            authors=authors_filter,
+            works=works_filter
+        )
+
+        # Log what filters are being applied
+        if authors_filter or works_filter:
+            logger.info(f"Applying filters - Authors: {authors_filter}, Works: {works_filter}")
 
         # Get paragraphs from Manticore service
         paragraphs = get_paragraphs(user_query)
@@ -47,6 +67,15 @@ def search_ccel_database(query: str) -> str:
             return "No relevant passages found in the Christian Classics Ethereal Library for this query."
 
         formatted_results = "Found the following relevant passages from the Christian Classics Ethereal Library:\n\n"
+
+        # Add filter information if filters were applied
+        if authors_filter or works_filter:
+            filter_parts = []
+            if authors_filter:
+                filter_parts.append(f"Authors: {', '.join(authors_filter)}")
+            if works_filter:
+                filter_parts.append(f"Works: {', '.join(works_filter)}")
+            formatted_results += f"**Search Filters Applied:** {' | '.join(filter_parts)}\n\n"
 
         for i, paragraph in enumerate(paragraphs, 1):
             if isinstance(paragraph, dict):
@@ -67,7 +96,7 @@ def search_ccel_database(query: str) -> str:
             formatted_results += f"Record ID: {record_id}\n"
             formatted_results += f"Text: {text}\n\n"
 
-        logger.debug(f"Successfully retrieved {len(paragraphs)} passages from CCEL")
+        logger.info(f"Retrieved {len(paragraphs)} valid paragraphs for query: {query}")
         return formatted_results
 
     except Exception as e:

@@ -1,12 +1,79 @@
 import json
 import requests
 import logging
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Optional
+from urllib.parse import urlencode
 
 from ...config.settings import MANTICORE_API_URL
 from ...models.schemas import UserQuery
 
 logger = logging.getLogger(__name__)
+
+
+def get_all_works() -> Union[List[Dict[str, Any]], Dict[str, str]]:
+    """
+    Get all works from the Manticore works endpoint.
+
+    Returns:
+        List of work dictionaries or error dictionary if the request fails
+    """
+    try:
+        if not MANTICORE_API_URL:
+            logger.error("MANTICORE_API_URL is not configured")
+            return {"error": "Search service is not configured. Please contact administrator."}
+
+        # Replace classify.php with works.php in the URL
+        base_url = MANTICORE_API_URL.replace('/classify.php', '')
+        works_url = f"{base_url}/works.php"
+        
+        logger.debug(f"Fetching all works from: {works_url}")
+        response = requests.get(works_url, timeout=10)
+        response.raise_for_status()
+        
+        try:
+            works_data = response.json()
+            logger.info(f"Successfully retrieved {len(works_data)} works")
+            return works_data
+        except json.JSONDecodeError:
+            logger.error("Failed to parse works response as JSON")
+            return {"error": "Invalid response format from works endpoint"}
+            
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching works: {e}")
+        return {"error": f"Failed to fetch works: {str(e)}"}
+
+
+def get_all_authors() -> Union[List[Dict[str, Any]], Dict[str, str]]:
+    """
+    Get all authors from the Manticore authors endpoint.
+
+    Returns:
+        List of author dictionaries or error dictionary if the request fails
+    """
+    try:
+        if not MANTICORE_API_URL:
+            logger.error("MANTICORE_API_URL is not configured")
+            return {"error": "Search service is not configured. Please contact administrator."}
+
+        # Replace classify.php with authors.php in the URL
+        base_url = MANTICORE_API_URL.replace('/classify.php', '')
+        authors_url = f"{base_url}/authors.php"
+        
+        logger.debug(f"Fetching all authors from: {authors_url}")
+        response = requests.get(authors_url, timeout=10)
+        response.raise_for_status()
+        
+        try:
+            authors_data = response.json()
+            logger.info(f"Successfully retrieved {len(authors_data)} authors")
+            return authors_data
+        except json.JSONDecodeError:
+            logger.error("Failed to parse authors response as JSON")
+            return {"error": "Invalid response format from authors endpoint"}
+            
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching authors: {e}")
+        return {"error": f"Failed to fetch authors: {str(e)}"}
 
 
 def clean_manticore_response(response_text: str) -> List[Dict[str, Any]]:
@@ -56,7 +123,7 @@ def get_paragraphs(request: UserQuery) -> Union[List[Dict[str, str]], Dict[str, 
     Get paragraphs from Manticore API for a given query.
 
     Args:
-        request: UserQuery containing the search query
+        request: UserQuery containing the search query, and optionally works and authors filters
 
     Returns:
         List of paragraph dictionaries containing text and metadata,
@@ -69,12 +136,32 @@ def get_paragraphs(request: UserQuery) -> Union[List[Dict[str, str]], Dict[str, 
                 "answer": "Search service is not configured. Please contact administrator.",
             }
 
-        logger.debug(f"Making request to Manticore API for query: {request.query}")
-        response = requests.get(
-            MANTICORE_API_URL,
-            params={"text": request.query},
-            timeout=10
-        )
+        # Build query parameters
+        params = {
+            "text": request.query,
+            "returnLimit": request.top_k or 5
+        }
+
+        # Build array parameters for works[] and authors[]
+        work_params = []
+        if hasattr(request, 'works') and request.works:
+            work_params = [f"works[]={work}" for work in request.works]
+
+        author_params = []
+        if hasattr(request, 'authors') and request.authors:
+            author_params = [f"authors[]={author}" for author in request.authors]
+
+        # Build the final URL with array parameters
+        base_params = urlencode(params)
+        array_params = "&".join(work_params + author_params)
+
+        if array_params:
+            final_url = f"{MANTICORE_API_URL}?{base_params}&{array_params}"
+        else:
+            final_url = f"{MANTICORE_API_URL}?{base_params}"
+
+        logger.debug(f"Making request to Manticore API: {final_url}")
+        response = requests.get(final_url, timeout=10)
         logger.debug(f"Manticore API response status: {response.status_code}")
 
         # Check for HTTP errors

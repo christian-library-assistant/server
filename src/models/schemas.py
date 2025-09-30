@@ -7,6 +7,8 @@ class UserQuery(BaseModel):
     top_k: Optional[int] = 5
     conversation_history: Optional[List[Dict[str, str]]] = []
     session_id: Optional[str] = None
+    works: Optional[List[str]] = []
+    authors: Optional[List[str]] = []
 
 
 class Citation(BaseModel):
