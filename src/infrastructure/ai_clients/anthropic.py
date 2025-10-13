@@ -87,7 +87,7 @@ class AnthropicClient(AIClient):
         # Call Claude API to generate response
         logger.debug(f"Calling Claude API with {len(messages)} messages")
         response = self.client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-3-5-haiku-latest",
             max_tokens=4000,
             temperature=0.1,
             system=system_prompt,

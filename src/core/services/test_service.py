@@ -60,7 +60,9 @@ class TestService:
             query=request.query,
             top_k=request.top_k,
             conversation_history=[],
-            session_id=None  # No session for testing
+            session_id=None,  # No session for testing
+            authors=request.authors,
+            works=request.works
         )
         
         results = []
@@ -166,17 +168,39 @@ class TestService:
             return fallback_results, "Error: Could not generate AI response", processing_info
 
     async def _get_formatted_results(
-        self, 
-        request: TestQueryRequest, 
+        self,
+        request: TestQueryRequest,
         ai_answer: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Get and format search results based on requested fields."""
         # Ensure MANTICORE_API_URL is not None
         if not MANTICORE_API_URL:
             raise ValueError("MANTICORE_API_URL not configured")
-            
+
+        # Build query parameters with filters
+        from urllib.parse import urlencode
+        params = {"text": request.query, "returnLimit": request.top_k}
+
+        # Build array parameters for works[] and authors[]
+        work_params = []
+        if request.works:
+            work_params = [f"works[]={work}" for work in request.works]
+
+        author_params = []
+        if request.authors:
+            author_params = [f"authors[]={author}" for author in request.authors]
+
+        # Build the final URL with array parameters
+        base_params = urlencode(params)
+        array_params = "&".join(work_params + author_params)
+
+        if array_params:
+            final_url = f"{MANTICORE_API_URL}?{base_params}&{array_params}"
+        else:
+            final_url = f"{MANTICORE_API_URL}?{base_params}"
+
         # Get raw search results from Manticore
-        manticore_response = requests.get(MANTICORE_API_URL, params={"text": request.query})
+        manticore_response = requests.get(final_url)
         cleaned_response = clean_manticore_response(manticore_response.text)
         
         # Limit to top_k results
@@ -194,8 +218,30 @@ class TestService:
         # Ensure MANTICORE_API_URL is not None
         if not MANTICORE_API_URL:
             raise ValueError("MANTICORE_API_URL not configured")
-            
-        manticore_response = requests.get(MANTICORE_API_URL, params={"text": request.query})
+
+        # Build query parameters with filters
+        from urllib.parse import urlencode
+        params = {"text": request.query, "returnLimit": request.top_k}
+
+        # Build array parameters for works[] and authors[]
+        work_params = []
+        if request.works:
+            work_params = [f"works[]={work}" for work in request.works]
+
+        author_params = []
+        if request.authors:
+            author_params = [f"authors[]={author}" for author in request.authors]
+
+        # Build the final URL with array parameters
+        base_params = urlencode(params)
+        array_params = "&".join(work_params + author_params)
+
+        if array_params:
+            final_url = f"{MANTICORE_API_URL}?{base_params}&{array_params}"
+        else:
+            final_url = f"{MANTICORE_API_URL}?{base_params}"
+
+        manticore_response = requests.get(final_url)
         cleaned_response = clean_manticore_response(manticore_response.text)
         limited_results = cleaned_response[:request.top_k]
         

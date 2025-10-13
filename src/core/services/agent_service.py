@@ -56,8 +56,12 @@ class AgentRAGService:
             session_id, theological_agent = self.session_manager.get_or_create_session(session_id)
             logger.debug(f"Using session: {session_id}")
 
-            # Query the agent (conversation history is maintained in agent memory)
-            agent_response = theological_agent.query(question=request.query)
+            # Query the agent with optional filters (conversation history is maintained in agent memory)
+            agent_response = theological_agent.query(
+                question=request.query,
+                authors=request.authors,
+                works=request.works
+            )
 
             # Extract response components
             answer_text = agent_response.get("answer", "")

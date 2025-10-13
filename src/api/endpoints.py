@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Request, Header
 
 from ..models.schemas import UserQuery, AssistantResponse, TestQueryRequest, TestResponse
-from ..infrastructure.search.manticore import clean_manticore_response
+from ..infrastructure.search.manticore import clean_manticore_response, get_all_authors, get_all_works
 from ..infrastructure.ai_clients.base import AIClient
 from ..core.agents.session_manager import AgentSessionManager
 from ..core.services.rag_service import RegularRAGService
@@ -100,9 +100,29 @@ async def generate_response_with_agent(
     Generate a response to user query using the agentic RAG system.
 
     This endpoint uses a LangChain agent with Claude that can reason about
-    when to search the CCEL database. 
-    Helps maintain conversation. 
+    when to search the CCEL database.
+    Helps maintain conversation.
     Each user gets their own persistent conversation session.
+
+    **Filtering by Author or Work:**
+    You can limit searches to specific authors or works by including them in the request:
+    ```json
+    {
+      "query": "What is grace?",
+      "authors": ["augustine"],
+      "works": ["confessions"]
+    }
+    ```
+
+    When filters are provided, the agent will be instructed to ONLY search within those
+    specific authors/works. This is different from mentioning an author in the query text -
+    filters are enforced constraints that apply to all searches during the session.
+
+    **Discovering Author/Work IDs:**
+    - GET /authors - List all available author IDs
+    - GET /authors?query=augustine - Search for author IDs
+    - GET /works - List all available work IDs
+    - GET /works?query=confessions - Search for work IDs
     """
     try:
         # Use session ID from header or request body
@@ -178,7 +198,12 @@ async def get_session_info(
         return await agent_service.get_session_info(session_id)
     except ValueError as e:
         logger.warning(f"Invalid request: {str(e)}")
-        raise HTTPException(status_code=404, detail=str(e))
+        # Return a helpful message instead of 404 for non-existent sessions
+        return {
+            "exists": False,
+            "message": "Session not found or has expired. Sessions expire after 30 minutes of inactivity.",
+            "session_id": session_id
+        }
     except Exception as e:
         logger.error(f"Error getting session info: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -247,7 +272,7 @@ async def test_rag_systems(
 async def get_test_fields():
     """
     📋 **Get Available Test Fields**
-    
+
     Returns all available fields that can be requested in the test endpoint.
     Use this to discover what data you can include in your test responses.
     """
@@ -261,3 +286,181 @@ async def get_test_fields():
             "return_fields": ["record_id", "text", "authorid", "workid", "answer"]
         }
     }
+
+
+@router.get("/authors")
+async def search_authors(query: Optional[str] = None):
+    """
+    🔍 **Search or List Authors**
+
+    Discover valid author IDs for filtering searches.
+
+    **Without query parameter:** Returns all author IDs from the CCEL database.
+
+    **With query parameter:** Performs fuzzy search to find matching authors.
+
+    **Examples:**
+    - `GET /authors` - Returns all authors
+    - `GET /authors?query=augustine` - Searches for authors matching "augustine"
+    - `GET /authors?query=aquinas` - Searches for authors matching "aquinas"
+
+    **Use these IDs with:**
+    - `/query-agent` endpoint's `authors` parameter
+    - `/test` endpoint's `authors` parameter
+    """
+    try:
+        # Get all authors from Manticore API
+        authors_data = get_all_authors()
+
+        # Handle error case
+        if isinstance(authors_data, dict) and "error" in authors_data:
+            raise HTTPException(status_code=503, detail=authors_data["error"])
+
+        if not isinstance(authors_data, list):
+            raise HTTPException(status_code=500, detail="Invalid response from authors service")
+
+        # If no query, return all authors
+        if not query:
+            return {
+                "total": len(authors_data),
+                "authors": sorted(authors_data),
+                "note": "Use query parameter to search: GET /authors?query=augustine"
+            }
+
+        # Perform fuzzy search
+        from rapidfuzz import process, fuzz
+
+        author_list = [str(author) for author in authors_data if author]
+
+        if not author_list:
+            return {
+                "query": query,
+                "total_matches": 0,
+                "matches": [],
+                "message": "No authors available in database"
+            }
+
+        # Get top 10 matches
+        matches = process.extract(
+            query,
+            author_list,
+            scorer=fuzz.WRatio,
+            limit=10
+        )
+
+        # Format results
+        formatted_matches = [
+            {
+                "author_id": author_id,
+                "similarity_score": score
+            }
+            for author_id, score, _ in matches
+        ]
+
+        return {
+            "query": query,
+            "total_matches": len(formatted_matches),
+            "matches": formatted_matches,
+            "usage_example": {
+                "endpoint": "/query-agent",
+                "request_body": {
+                    "query": "What is grace?",
+                    "authors": [formatted_matches[0]["author_id"]] if formatted_matches else []
+                }
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error searching authors: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error searching authors: {str(e)}")
+
+
+@router.get("/works")
+async def search_works(query: Optional[str] = None):
+    """
+    📚 **Search or List Works**
+
+    Discover valid work IDs for filtering searches.
+
+    **Without query parameter:** Returns all work IDs from the CCEL database.
+
+    **With query parameter:** Performs fuzzy search to find matching works.
+
+    **Examples:**
+    - `GET /works` - Returns all works
+    - `GET /works?query=confessions` - Searches for works matching "confessions"
+    - `GET /works?query=city of god` - Searches for works matching "city of god"
+
+    **Use these IDs with:**
+    - `/query-agent` endpoint's `works` parameter
+    - `/test` endpoint's `works` parameter
+    """
+    try:
+        # Get all works from Manticore API
+        works_data = get_all_works()
+
+        # Handle error case
+        if isinstance(works_data, dict) and "error" in works_data:
+            raise HTTPException(status_code=503, detail=works_data["error"])
+
+        if not isinstance(works_data, list):
+            raise HTTPException(status_code=500, detail="Invalid response from works service")
+
+        # If no query, return all works
+        if not query:
+            return {
+                "total": len(works_data),
+                "works": sorted(works_data),
+                "note": "Use query parameter to search: GET /works?query=confessions"
+            }
+
+        # Perform fuzzy search
+        from rapidfuzz import process, fuzz
+
+        work_list = [str(work) for work in works_data if work]
+
+        if not work_list:
+            return {
+                "query": query,
+                "total_matches": 0,
+                "matches": [],
+                "message": "No works available in database"
+            }
+
+        # Get top 10 matches
+        matches = process.extract(
+            query,
+            work_list,
+            scorer=fuzz.WRatio,
+            limit=10
+        )
+
+        # Format results
+        formatted_matches = [
+            {
+                "work_id": work_id,
+                "similarity_score": score
+            }
+            for work_id, score, _ in matches
+        ]
+
+        return {
+            "query": query,
+            "total_matches": len(formatted_matches),
+            "matches": formatted_matches,
+            "usage_example": {
+                "endpoint": "/query-agent",
+                "request_body": {
+                    "query": "What is grace?",
+                    "works": [formatted_matches[0]["work_id"]] if formatted_matches else []
+                }
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error searching works: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error searching works: {str(e)}")

@@ -150,10 +150,20 @@ class AgentSessionManager:
         with self._lock:
             if session_id in self.sessions:
                 session_data = self.sessions[session_id]
+                agent = session_data['agent']
+
+                # Get message count from agent's memory
+                message_count = 0
+                try:
+                    message_count = len(agent.memory.chat_memory.messages)
+                except Exception as e:
+                    logger.warning(f"Could not get message count for session {session_id}: {e}")
+
                 return {
                     'session_id': session_id,
                     'created_at': session_data['created_at'].isoformat(),
                     'last_accessed': session_data['last_accessed'].isoformat(),
-                    'age_minutes': (datetime.now(timezone.utc) - session_data['created_at']).total_seconds() / 60
+                    'age_minutes': (datetime.now(timezone.utc) - session_data['created_at']).total_seconds() / 60,
+                    'message_count': message_count
                 }
             return None

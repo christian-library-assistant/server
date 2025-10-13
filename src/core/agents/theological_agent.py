@@ -94,7 +94,7 @@ class TheologicalAgent:
         """Create a custom prompt template optimized for theological reasoning."""
         return PromptTemplate(
             template=THEOLOGICAL_AGENT_PROMPT_TEMPLATE,
-            input_variables=["input", "chat_history", "agent_scratchpad"],
+            input_variables=["input", "chat_history", "agent_scratchpad", "filter_context"],
             partial_variables={"tools": self._format_tools(), "tool_names": self._get_tool_names()}
         )
 
@@ -109,12 +109,52 @@ class TheologicalAgent:
         """Get comma-separated tool names."""
         return ", ".join([tool.name for tool in self.tools])
 
-    def query(self, question: str) -> Dict[str, Any]:
+    def _build_filter_context(self, authors: Optional[List[str]] = None, works: Optional[List[str]] = None) -> str:
+        """
+        Build filter context string for the prompt.
+
+        Args:
+            authors: Optional list of author IDs to filter by
+            works: Optional list of work IDs to filter by
+
+        Returns:
+            Formatted filter context string
+        """
+        if not authors and not works:
+            return ""
+
+        context_parts = []
+        context_parts.append("🔍 SEARCH FILTERS APPLIED:")
+        context_parts.append("The user has requested that ALL searches be limited to the following:")
+
+        if authors:
+            authors_str = ", ".join(f'"{a}"' for a in authors)
+            context_parts.append(f"  • Authors: {authors_str}")
+
+        if works:
+            works_str = ", ".join(f'"{w}"' for w in works)
+            context_parts.append(f"  • Works: {works_str}")
+
+        context_parts.append("")
+        context_parts.append("IMPORTANT: When you use search_ccel_database, you MUST pass these filter values:")
+        if authors:
+            context_parts.append(f'  authors="{",".join(authors)}"')
+        if works:
+            context_parts.append(f'  works="{",".join(works)}"')
+        context_parts.append("")
+        context_parts.append("This ensures all search results come only from the specified authors/works.")
+        context_parts.append("=" * 80)
+
+        return "\n".join(context_parts)
+
+    def query(self, question: str, authors: Optional[List[str]] = None, works: Optional[List[str]] = None) -> Dict[str, Any]:
         """
         Process a theological question and return a structured response.
 
         Args:
             question: The theological question or query
+            authors: Optional list of author IDs to filter search results
+            works: Optional list of work IDs to filter search results
 
         Returns:
             Dictionary containing the response and sources
@@ -122,8 +162,14 @@ class TheologicalAgent:
         try:
             logger.debug(f"Processing theological query: {question}")
 
-            # Execute the agent
-            response = self.agent_executor.invoke({"input": question})
+            # Build filter context for the prompt
+            filter_context = self._build_filter_context(authors, works)
+
+            # Execute the agent with filter context
+            response = self.agent_executor.invoke({
+                "input": question,
+                "filter_context": filter_context
+            })
 
             # Extract the final answer
             answer = response.get("output", "I apologize, but I encountered an error processing your question.")

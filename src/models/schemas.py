@@ -50,14 +50,18 @@ class TestQueryRequest(BaseModel):
     agentic: bool = False
     top_k: int = 5
     return_fields: List[str] = ["record_id"]  # Default to just record IDs
-    
+    authors: Optional[List[str]] = []
+    works: Optional[List[str]] = []
+
     class Config:
         schema_extra = {
             "example": {
                 "query": "What is the nature of God?",
                 "agentic": True,
                 "top_k": 5,
-                "return_fields": ["record_id", "text", "authorid", "workid", "citation_text", "answer"]
+                "return_fields": ["record_id", "text", "authorid", "workid", "citation_text", "answer"],
+                "authors": ["augustine"],
+                "works": ["confessions"]
             }
         }
 
