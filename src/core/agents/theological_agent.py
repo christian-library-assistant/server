@@ -94,7 +94,7 @@ class TheologicalAgent:
         """Create a custom prompt template optimized for theological reasoning."""
         return PromptTemplate(
             template=THEOLOGICAL_AGENT_PROMPT_TEMPLATE,
-            input_variables=["input", "chat_history", "agent_scratchpad", "filter_context"],
+            input_variables=["input", "chat_history", "agent_scratchpad"],
             partial_variables={"tools": self._format_tools(), "tool_names": self._get_tool_names()}
         )
 
@@ -136,7 +136,7 @@ class TheologicalAgent:
             context_parts.append(f"  • Works: {works_str}")
 
         context_parts.append("")
-        context_parts.append("IMPORTANT: When you use search_ccel_database, you MUST pass these filter values:")
+        context_parts.append("IMPORTANT: When you use search_ccel_database, you MUST pass these filte   r values:")
         if authors:
             context_parts.append(f'  authors="{",".join(authors)}"')
         if works:
@@ -165,11 +165,14 @@ class TheologicalAgent:
             # Build filter context for the prompt
             filter_context = self._build_filter_context(authors, works)
 
-            # Execute the agent with filter context
-            response = self.agent_executor.invoke({
-                "input": question,
-                "filter_context": filter_context
-            })
+            # Prepend filter context to the question if filters are provided
+            if filter_context:
+                full_input = f"{filter_context}\n\nUser Question: {question}"
+            else:
+                full_input = question
+
+            # Execute the agent with the full input
+            response = self.agent_executor.invoke({"input": full_input})
 
             # Extract the final answer
             answer = response.get("output", "I apologize, but I encountered an error processing your question.")
