@@ -9,4 +9,3 @@ google-genai>=1.10.0
 langchain
 langchain_anthropic
 langchain-community
-rapidfuzz

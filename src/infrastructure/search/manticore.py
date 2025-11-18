@@ -25,11 +25,11 @@ def get_all_works() -> Union[List[Dict[str, Any]], Dict[str, str]]:
         # Replace classify.php with works.php in the URL
         base_url = MANTICORE_API_URL.replace('/classify.php', '')
         works_url = f"{base_url}/works.php"
-        
+
         logger.debug(f"Fetching all works from: {works_url}")
         response = requests.get(works_url, timeout=10)
         response.raise_for_status()
-        
+
         try:
             works_data = response.json()
             logger.info(f"Successfully retrieved {len(works_data)} works")
@@ -37,10 +37,51 @@ def get_all_works() -> Union[List[Dict[str, Any]], Dict[str, str]]:
         except json.JSONDecodeError:
             logger.error("Failed to parse works response as JSON")
             return {"error": "Invalid response format from works endpoint"}
-            
+
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching works: {e}")
         return {"error": f"Failed to fetch works: {str(e)}"}
+
+
+def search_works_semantic(work_query: str) -> Union[List[Dict[str, Any]], Dict[str, str]]:
+    """
+    Perform semantic search for works using the Manticore API's vector search.
+    Uses OpenAI embeddings to find works similar to the query.
+
+    Args:
+        work_query: Work title or description to search for
+
+    Returns:
+        List of dictionaries containing author-work pairings with IDs and names,
+        or error dictionary if the request fails
+    """
+    try:
+        if not MANTICORE_API_URL:
+            logger.error("MANTICORE_API_URL is not configured")
+            return {"error": "Search service is not configured. Please contact administrator."}
+
+        # Replace classify.php with works.php in the URL
+        base_url = MANTICORE_API_URL.replace('/classify.php', '')
+        works_url = f"{base_url}/works.php"
+
+        # Add work query parameter for semantic search
+        params = {"work": work_query}
+
+        logger.debug(f"Performing semantic search for work: {work_query}")
+        response = requests.get(works_url, params=params, timeout=10)
+        response.raise_for_status()
+
+        try:
+            works_data = response.json()
+            logger.info(f"Successfully retrieved {len(works_data)} work matches for query: {work_query}")
+            return works_data
+        except json.JSONDecodeError:
+            logger.error("Failed to parse works response as JSON")
+            return {"error": "Invalid response format from works endpoint"}
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error searching works: {e}")
+        return {"error": f"Failed to search works: {str(e)}"}
 
 
 def get_all_authors() -> Union[List[Dict[str, Any]], Dict[str, str]]:
@@ -58,11 +99,11 @@ def get_all_authors() -> Union[List[Dict[str, Any]], Dict[str, str]]:
         # Replace classify.php with authors.php in the URL
         base_url = MANTICORE_API_URL.replace('/classify.php', '')
         authors_url = f"{base_url}/authors.php"
-        
+
         logger.debug(f"Fetching all authors from: {authors_url}")
         response = requests.get(authors_url, timeout=10)
         response.raise_for_status()
-        
+
         try:
             authors_data = response.json()
             logger.info(f"Successfully retrieved {len(authors_data)} authors")
@@ -70,10 +111,51 @@ def get_all_authors() -> Union[List[Dict[str, Any]], Dict[str, str]]:
         except json.JSONDecodeError:
             logger.error("Failed to parse authors response as JSON")
             return {"error": "Invalid response format from authors endpoint"}
-            
+
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching authors: {e}")
         return {"error": f"Failed to fetch authors: {str(e)}"}
+
+
+def search_authors_semantic(author_query: str) -> Union[Dict[str, Any], Dict[str, str]]:
+    """
+    Perform semantic search for authors using the Manticore API's vector search.
+    Uses OpenAI embeddings to find authors similar to the query.
+
+    Args:
+        author_query: Author name or description to search for
+
+    Returns:
+        Dictionary mapping author IDs to author info (name and associated works),
+        or error dictionary if the request fails
+    """
+    try:
+        if not MANTICORE_API_URL:
+            logger.error("MANTICORE_API_URL is not configured")
+            return {"error": "Search service is not configured. Please contact administrator."}
+
+        # Replace classify.php with authors.php in the URL
+        base_url = MANTICORE_API_URL.replace('/classify.php', '')
+        authors_url = f"{base_url}/authors.php"
+
+        # Add author query parameter for semantic search
+        params = {"author": author_query}
+
+        logger.debug(f"Performing semantic search for author: {author_query}")
+        response = requests.get(authors_url, params=params, timeout=10)
+        response.raise_for_status()
+
+        try:
+            authors_data = response.json()
+            logger.info(f"Successfully retrieved {len(authors_data)} author matches for query: {author_query}")
+            return authors_data
+        except json.JSONDecodeError:
+            logger.error("Failed to parse authors response as JSON")
+            return {"error": "Invalid response format from authors endpoint"}
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error searching authors: {e}")
+        return {"error": f"Failed to search authors: {str(e)}"}
 
 
 def clean_manticore_response(response_text: str) -> List[Dict[str, Any]]:

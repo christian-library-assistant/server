@@ -113,25 +113,38 @@ Filters constrain searches to specific authors or works. When specified, the sea
 
 ### Finding Author and Work IDs
 
-Use discovery endpoints to find valid IDs:
+Use discovery endpoints to find valid IDs. These endpoints use **semantic search** powered by AI embeddings to understand meaning, not just text similarity.
 
 ```bash
 # List all authors
 GET /authors
 
-# Search for specific author
+# Search for specific author using semantic search
 GET /authors?query=augustine
-# Returns: [{"author_id": "augustine", "similarity_score": 100}, ...]
+# Returns: [{"author_id": "augustine", "author_name": "Augustine of Hippo", "associated_works": {...}}, ...]
+
+# Semantic search examples (understands meaning):
+GET /authors?query=early church father
+GET /authors?query=reformer
 
 # List all works
 GET /works
 
-# Search for specific work
+# Search for specific work using semantic search
 GET /works?query=confessions
-# Returns: [{"work_id": "confessions", "similarity_score": 100}, ...]
+# Returns: [{"work_id": "confessions", "work_name": "Confessions", "authors": [...]}, ...]
+
+# Semantic search examples (understands meaning):
+GET /works?query=book about prayer
+GET /works?query=theological treatise on grace
 ```
 
 **Common IDs:** `augustine`, `aquinas`, `calvin`, `luther` (authors) • `confessions`, `city`, `summa`, `institutes` (works)
+
+**Semantic Search Benefits:**
+- Understands meaning, not just literal text matches
+- Can find authors/works by description (e.g., "early church father", "book about prayer")
+- Returns rich metadata including author names, work titles, and relationships
 
 ### Filter Examples
 

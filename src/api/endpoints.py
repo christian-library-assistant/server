@@ -297,65 +297,67 @@ async def search_authors(query: Optional[str] = None):
 
     **Without query parameter:** Returns all author IDs from the CCEL database.
 
-    **With query parameter:** Performs fuzzy search to find matching authors.
+    **With query parameter:** Performs semantic search using AI embeddings to find matching authors.
 
     **Examples:**
     - `GET /authors` - Returns all authors
     - `GET /authors?query=augustine` - Searches for authors matching "augustine"
-    - `GET /authors?query=aquinas` - Searches for authors matching "aquinas"
+    - `GET /authors?query=early church father` - Searches semantically for early church fathers
 
     **Use these IDs with:**
     - `/query-agent` endpoint's `authors` parameter
     - `/test` endpoint's `authors` parameter
     """
     try:
-        # Get all authors from Manticore API
-        authors_data = get_all_authors()
-
-        # Handle error case
-        if isinstance(authors_data, dict) and "error" in authors_data:
-            raise HTTPException(status_code=503, detail=authors_data["error"])
-
-        if not isinstance(authors_data, list):
-            raise HTTPException(status_code=500, detail="Invalid response from authors service")
-
         # If no query, return all authors
         if not query:
+            authors_data = get_all_authors()
+
+            # Handle error case
+            if isinstance(authors_data, dict) and "error" in authors_data:
+                raise HTTPException(status_code=503, detail=authors_data["error"])
+
+            if not isinstance(authors_data, list):
+                raise HTTPException(status_code=500, detail="Invalid response from authors service")
+
             return {
                 "total": len(authors_data),
                 "authors": sorted(authors_data),
                 "note": "Use query parameter to search: GET /authors?query=augustine"
             }
 
-        # Perform fuzzy search
-        from rapidfuzz import process, fuzz
+        # Perform semantic search
+        from ...infrastructure.search.manticore import search_authors_semantic
 
-        author_list = [str(author) for author in authors_data if author]
+        authors_data = search_authors_semantic(query)
 
-        if not author_list:
+        # Handle error case
+        if isinstance(authors_data, dict) and "error" in authors_data:
+            raise HTTPException(status_code=503, detail=authors_data["error"])
+
+        if not isinstance(authors_data, dict):
+            raise HTTPException(status_code=500, detail="Invalid response from authors search service")
+
+        if len(authors_data) == 0:
             return {
                 "query": query,
                 "total_matches": 0,
                 "matches": [],
-                "message": "No authors available in database"
+                "message": f"No authors found matching '{query}'"
             }
 
-        # Get top 10 matches
-        matches = process.extract(
-            query,
-            author_list,
-            scorer=fuzz.WRatio,
-            limit=10
-        )
+        # Format results with author info
+        # API returns: {"authorid": {"authorname": "Name", "associatedworks": {"workid": "workname", ...}}, ...}
+        formatted_matches = []
+        for author_id, author_info in authors_data.items():
+            author_name = author_info.get('authorname', author_id)
+            associated_works = author_info.get('associatedworks', {})
 
-        # Format results
-        formatted_matches = [
-            {
+            formatted_matches.append({
                 "author_id": author_id,
-                "similarity_score": score
-            }
-            for author_id, score, _ in matches
-        ]
+                "author_name": author_name,
+                "associated_works": associated_works
+            })
 
         return {
             "query": query,
@@ -386,64 +388,88 @@ async def search_works(query: Optional[str] = None):
 
     **Without query parameter:** Returns all work IDs from the CCEL database.
 
-    **With query parameter:** Performs fuzzy search to find matching works.
+    **With query parameter:** Performs semantic search using AI embeddings to find matching works.
 
     **Examples:**
     - `GET /works` - Returns all works
     - `GET /works?query=confessions` - Searches for works matching "confessions"
-    - `GET /works?query=city of god` - Searches for works matching "city of god"
+    - `GET /works?query=book about prayer` - Searches semantically for works about prayer
 
     **Use these IDs with:**
     - `/query-agent` endpoint's `works` parameter
     - `/test` endpoint's `works` parameter
     """
     try:
-        # Get all works from Manticore API
-        works_data = get_all_works()
-
-        # Handle error case
-        if isinstance(works_data, dict) and "error" in works_data:
-            raise HTTPException(status_code=503, detail=works_data["error"])
-
-        if not isinstance(works_data, list):
-            raise HTTPException(status_code=500, detail="Invalid response from works service")
-
         # If no query, return all works
         if not query:
+            works_data = get_all_works()
+
+            # Handle error case
+            if isinstance(works_data, dict) and "error" in works_data:
+                raise HTTPException(status_code=503, detail=works_data["error"])
+
+            if not isinstance(works_data, list):
+                raise HTTPException(status_code=500, detail="Invalid response from works service")
+
             return {
                 "total": len(works_data),
                 "works": sorted(works_data),
                 "note": "Use query parameter to search: GET /works?query=confessions"
             }
 
-        # Perform fuzzy search
-        from rapidfuzz import process, fuzz
+        # Perform semantic search
+        from ...infrastructure.search.manticore import search_works_semantic
 
-        work_list = [str(work) for work in works_data if work]
+        works_data = search_works_semantic(query)
 
-        if not work_list:
+        # Handle error case
+        if isinstance(works_data, dict) and "error" in works_data:
+            raise HTTPException(status_code=503, detail=works_data["error"])
+
+        if not isinstance(works_data, list):
+            raise HTTPException(status_code=500, detail="Invalid response from works search service")
+
+        if len(works_data) == 0:
             return {
                 "query": query,
                 "total_matches": 0,
                 "matches": [],
-                "message": "No works available in database"
+                "message": f"No works found matching '{query}'"
             }
 
-        # Get top 10 matches
-        matches = process.extract(
-            query,
-            work_list,
-            scorer=fuzz.WRatio,
-            limit=10
-        )
+        # Format results with work info
+        # API returns: [{"authorid": "...", "authorname": "...", "workid": "...", "workname": "..."}, ...]
+        # Group works by unique work IDs to avoid duplicates
+        seen_works = {}
+        for item in works_data:
+            work_id = item.get('workid', '')
+            work_name = item.get('workname', work_id)
+            author_id = item.get('authorid', '')
+            author_name = item.get('authorname', author_id)
 
-        # Format results
+            if work_id not in seen_works:
+                seen_works[work_id] = {
+                    'work_name': work_name,
+                    'authors': [{
+                        'author_id': author_id,
+                        'author_name': author_name
+                    }]
+                }
+            else:
+                # Check if author already in list
+                if not any(a['author_id'] == author_id for a in seen_works[work_id]['authors']):
+                    seen_works[work_id]['authors'].append({
+                        'author_id': author_id,
+                        'author_name': author_name
+                    })
+
         formatted_matches = [
             {
                 "work_id": work_id,
-                "similarity_score": score
+                "work_name": work_info['work_name'],
+                "authors": work_info['authors']
             }
-            for work_id, score, _ in matches
+            for work_id, work_info in seen_works.items()
         ]
 
         return {
