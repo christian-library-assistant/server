@@ -14,9 +14,10 @@ from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain.memory import ConversationBufferMemory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_core.tools import StructuredTool
 from pydantic import SecretStr
 
-from ..tools.manticore_tool import search_ccel_database, get_ccel_source_details
+from ..tools.manticore_tool import search_ccel_database, get_ccel_source_details, _search_ccel_database_impl, SearchCCELInput
 from ..tools.author_works_tools import search_ccel_authors, search_ccel_works
 from ...config.settings import ANTHROPIC_API_KEY
 from ...prompts.agent_prompts import THEOLOGICAL_AGENT_PROMPT_TEMPLATE
@@ -44,6 +45,10 @@ class TheologicalAgent:
         self.model_name = model_name
         self.temperature = temperature
 
+        # Store current filters as instance variables (not in conversation memory)
+        self.current_authors: Optional[List[str]] = None
+        self.current_works: Optional[List[str]] = None
+
         # Initialize the LLM
         self.llm = ChatAnthropic(
             model_name=model_name,
@@ -55,9 +60,8 @@ class TheologicalAgent:
             api_key=SecretStr(ANTHROPIC_API_KEY)
         )
 
-        # Define available tools #TODO: Add the bible verse tool and the web_search_tool.
-        self.tools = [
-            search_ccel_database,
+        # Define base tools (non-search tools that don't need filter injection)
+        self.base_tools = [
             search_ccel_authors,
             search_ccel_works,
             get_ccel_source_details
@@ -66,41 +70,130 @@ class TheologicalAgent:
         # Create custom prompt for theological reasoning
         self.prompt_template = self._create_prompt_template()
 
-        # Create the agent
-        self.agent = create_tool_calling_agent(
-            llm=self.llm,
-            tools=self.tools,
-            prompt=self.prompt_template
-        )
-
         # Create agent executor with memory
         self.memory = ConversationBufferMemory(
             memory_key="chat_history",
             return_messages=True
         )
 
-        self.agent_executor = AgentExecutor(
-            agent=self.agent,
-            tools=self.tools,
-            verbose=True,
-            memory=self.memory,
-            max_iterations=15,  # Prevent infinite loops
-            max_execution_time=120,  # 2 minute timeout
-            early_stopping_method="force",  # Force stop after max_iterations
-            handle_parsing_errors="Check your output format. You MUST include 'Final Answer:' in EVERY response, even for simple greetings. Follow the pattern: Thought: [reasoning]\nFinal Answer: [response]",
-            return_intermediate_steps=True  # For better debugging
-        )
+        # Build the agent with initial (empty) filters
+        self._rebuild_agent()
 
         logger.info(f"Initialized TheologicalAgent with model: {model_name}")
 
     def _create_prompt_template(self) -> ChatPromptTemplate:
         """Create a custom prompt template optimized for theological reasoning."""
         return ChatPromptTemplate.from_messages([
-            ("system", THEOLOGICAL_AGENT_PROMPT_TEMPLATE),
+            ("system", "{system_prompt}"),
             MessagesPlaceholder(variable_name="chat_history", optional=True),
             ("human", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad")
         ])
+
+    def _build_system_prompt_with_filters(self) -> str:
+        """
+        Build the system prompt with current filter context appended.
+
+        This keeps the agent aware of active filters without storing them in conversation memory.
+        The filter context is injected into the system prompt on every query.
+
+        Returns:
+            Complete system prompt with filter context if filters are active
+        """
+        base_prompt = THEOLOGICAL_AGENT_PROMPT_TEMPLATE
+
+        if not self.current_authors and not self.current_works:
+            return base_prompt
+
+        # Build concise filter context for system awareness
+        filter_parts = []
+        if self.current_authors:
+            authors_str = ", ".join(self.current_authors)
+            filter_parts.append(f"Authors: {authors_str}")
+        if self.current_works:
+            works_str = ", ".join(self.current_works)
+            filter_parts.append(f"Works: {works_str}")
+
+        filter_context = "\n\n" + "=" * 80 + "\n"
+        filter_context += "🔍 ACTIVE SEARCH FILTERS\n"
+        filter_context += "The user has applied the following filters to limit search results:\n"
+        filter_context += "  • " + "\n  • ".join(filter_parts) + "\n"
+        filter_context += "\nWhen the user asks about 'this author' or 'this work', they are referring to the filtered items above.\n"
+        filter_context += "All searches will automatically be limited to these filters.\n"
+        filter_context += "=" * 80
+
+        return base_prompt + filter_context
+
+    def _create_filter_injecting_search_tool(self):
+        """
+        Create a wrapper around search_ccel_database that automatically injects
+        current filter values when the tool is called.
+
+        This keeps filters separate from conversation memory while still ensuring
+        they're applied to searches.
+        """
+        def search_with_filters(query: str, authors: str = "", works: str = "", top_k: int = 20) -> str:
+            # Override with current filters if they exist
+            effective_authors = ",".join(self.current_authors) if self.current_authors else authors
+            effective_works = ",".join(self.current_works) if self.current_works else works
+
+            if self.current_authors or self.current_works:
+                logger.info(f"Injecting filters into search: authors={effective_authors}, works={effective_works}")
+
+            # Call the original implementation with injected filters
+            return _search_ccel_database_impl(query, effective_authors, effective_works, top_k)
+
+        # Create the tool with the same interface as the original
+        return StructuredTool.from_function(
+            func=search_with_filters,
+            name="search_ccel_database",
+            description=search_ccel_database.description,
+            args_schema=SearchCCELInput,
+            return_direct=False
+        )
+
+    def _rebuild_agent(self):
+        """
+        Rebuild the agent and executor with current filter settings.
+        This is called when filters change to inject them into the search tool
+        and update the system prompt with filter context.
+        """
+        # Create filter-injecting search tool
+        search_tool = self._create_filter_injecting_search_tool()
+
+        # Combine with base tools
+        self.tools = [search_tool] + self.base_tools
+
+        # Build system prompt with current filter context
+        system_prompt_with_filters = self._build_system_prompt_with_filters()
+
+        # Create updated prompt template with current filters
+        current_prompt_template = ChatPromptTemplate.from_messages([
+            ("system", system_prompt_with_filters),
+            MessagesPlaceholder(variable_name="chat_history", optional=True),
+            ("human", "{input}"),
+            MessagesPlaceholder(variable_name="agent_scratchpad")
+        ])
+
+        # Create the agent with updated tools and prompt
+        self.agent = create_tool_calling_agent(
+            llm=self.llm,
+            tools=self.tools,
+            prompt=current_prompt_template
+        )
+
+        # Create agent executor (reuses existing memory)
+        self.agent_executor = AgentExecutor(
+            agent=self.agent,
+            tools=self.tools,
+            verbose=True,
+            memory=self.memory,
+            max_iterations=15,
+            max_execution_time=120,
+            early_stopping_method="force",
+            handle_parsing_errors="Check your output format. You MUST include 'Final Answer:' in EVERY response, even for simple greetings. Follow the pattern: Thought: [reasoning]\nFinal Answer: [response]",
+            return_intermediate_steps=True
+        )
 
     def _extract_text_from_content(self, content: Any) -> str:
         """
@@ -133,44 +226,6 @@ class TheologicalAgent:
             logger.warning(f"Unexpected content type: {type(content)}")
             return str(content)
 
-    def _build_filter_context(self, authors: Optional[List[str]] = None, works: Optional[List[str]] = None) -> str:
-        """
-        Build filter context string for the prompt.
-
-        Args:
-            authors: Optional list of author IDs to filter by
-            works: Optional list of work IDs to filter by
-
-        Returns:
-            Formatted filter context string
-        """
-        if not authors and not works:
-            return ""
-
-        context_parts = []
-        context_parts.append("🔍 SEARCH FILTERS APPLIED:")
-        context_parts.append("The user has requested that ALL searches be limited to the following:")
-
-        if authors:
-            authors_str = ", ".join(f'"{a}"' for a in authors)
-            context_parts.append(f"  • Authors: {authors_str}")
-
-        if works:
-            works_str = ", ".join(f'"{w}"' for w in works)
-            context_parts.append(f"  • Works: {works_str}")
-
-        context_parts.append("")
-        context_parts.append("IMPORTANT: When you use search_ccel_database, you MUST pass these filte   r values:")
-        if authors:
-            context_parts.append(f'  authors="{",".join(authors)}"')
-        if works:
-            context_parts.append(f'  works="{",".join(works)}"')
-        context_parts.append("")
-        context_parts.append("This ensures all search results come only from the specified authors/works.")
-        context_parts.append("=" * 80)
-
-        return "\n".join(context_parts)
-
     def query(self, question: str, authors: Optional[List[str]] = None, works: Optional[List[str]] = None) -> Dict[str, Any]:
         """
         Process a theological question and return a structured response.
@@ -185,18 +240,26 @@ class TheologicalAgent:
         """
         try:
             logger.debug(f"Processing theological query: {question}")
+            logger.debug(f"Filters - Authors: {authors}, Works: {works}")
 
-            # Build filter context for the prompt
-            filter_context = self._build_filter_context(authors, works)
+            # Update current filters if they've changed
+            filters_changed = (self.current_authors != authors or self.current_works != works)
 
-            # Prepend filter context to the question if filters are provided
-            if filter_context:
-                full_input = f"{filter_context}\n\nUser Question: {question}"
-            else:
-                full_input = question
+            if filters_changed:
+                self.current_authors = authors
+                self.current_works = works
+                logger.info(f"Updated filters: authors={authors}, works={works}")
 
-            # Execute the agent with the full input
-            response = self.agent_executor.invoke({"input": full_input})
+            # Rebuild agent to include current filter context in system prompt
+            # This ensures agent is aware of active filters without storing them in conversation memory
+            # We rebuild on every query (not just when filters change) to ensure consistency
+            self._rebuild_agent()
+
+            # Execute the agent with the pure question
+            # Filter context is already baked into the agent's prompt template (via _rebuild_agent)
+            # This gives agent awareness without polluting conversation history
+            # Filters will also be automatically injected when the search tool is called
+            response = self.agent_executor.invoke({"input": question})
 
             # Extract the final answer (handle both string and list formats)
             raw_answer = response.get("output", "I apologize, but I encountered an error processing your question.")
