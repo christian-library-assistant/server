@@ -17,7 +17,12 @@ from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langchain_core.tools import StructuredTool
 from pydantic import SecretStr
 
-from ..tools.manticore_tool import search_ccel_database, get_ccel_source_details, _search_ccel_database_impl, SearchCCELInput
+from ..tools.manticore_tool import (
+    search_ccel_database,
+    get_ccel_source_details,
+    _search_ccel_database_impl,
+    SearchCCELInput,
+)
 from ..tools.author_works_tools import search_ccel_authors, search_ccel_works
 from ...config.settings import ANTHROPIC_API_KEY
 from ...prompts.agent_prompts import THEOLOGICAL_AGENT_PROMPT_TEMPLATE
@@ -57,14 +62,14 @@ class TheologicalAgent:
             stop=None,  # Let ReAct parser handle termination via format keywords
             verbose=True,
             temperature=temperature,
-            api_key=SecretStr(ANTHROPIC_API_KEY)
+            api_key=SecretStr(ANTHROPIC_API_KEY),
         )
 
         # Define base tools (non-search tools that don't need filter injection)
         self.base_tools = [
             search_ccel_authors,
             search_ccel_works,
-            get_ccel_source_details
+            get_ccel_source_details,
         ]
 
         # Create custom prompt for theological reasoning
@@ -72,8 +77,7 @@ class TheologicalAgent:
 
         # Create agent executor with memory
         self.memory = ConversationBufferMemory(
-            memory_key="chat_history",
-            return_messages=True
+            memory_key="chat_history", return_messages=True
         )
 
         # Build the agent with initial (empty) filters
@@ -83,12 +87,14 @@ class TheologicalAgent:
 
     def _create_prompt_template(self) -> ChatPromptTemplate:
         """Create a custom prompt template optimized for theological reasoning."""
-        return ChatPromptTemplate.from_messages([
-            ("system", "{system_prompt}"),
-            MessagesPlaceholder(variable_name="chat_history", optional=True),
-            ("human", "{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad")
-        ])
+        return ChatPromptTemplate.from_messages(
+            [
+                ("system", "{system_prompt}"),
+                MessagesPlaceholder(variable_name="chat_history", optional=True),
+                ("human", "{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ]
+        )
 
     def _build_system_prompt_with_filters(self) -> str:
         """
@@ -116,10 +122,14 @@ class TheologicalAgent:
 
         filter_context = "\n\n" + "=" * 80 + "\n"
         filter_context += "🔍 ACTIVE SEARCH FILTERS\n"
-        filter_context += "The user has applied the following filters to limit search results:\n"
+        filter_context += (
+            "The user has applied the following filters to limit search results:\n"
+        )
         filter_context += "  • " + "\n  • ".join(filter_parts) + "\n"
         filter_context += "\nWhen the user asks about 'this author' or 'this work', they are referring to the filtered items above.\n"
-        filter_context += "All searches will automatically be limited to these filters.\n"
+        filter_context += (
+            "All searches will automatically be limited to these filters.\n"
+        )
         filter_context += "=" * 80
 
         return base_prompt + filter_context
@@ -132,16 +142,27 @@ class TheologicalAgent:
         This keeps filters separate from conversation memory while still ensuring
         they're applied to searches.
         """
-        def search_with_filters(query: str, authors: str = "", works: str = "", top_k: int = 20) -> str:
+
+        def search_with_filters(
+            query: str, authors: str = "", works: str = "", top_k: int = 20
+        ) -> str:
             # Override with current filters if they exist
-            effective_authors = ",".join(self.current_authors) if self.current_authors else authors
-            effective_works = ",".join(self.current_works) if self.current_works else works
+            effective_authors = (
+                ",".join(self.current_authors) if self.current_authors else authors
+            )
+            effective_works = (
+                ",".join(self.current_works) if self.current_works else works
+            )
 
             if self.current_authors or self.current_works:
-                logger.info(f"Injecting filters into search: authors={effective_authors}, works={effective_works}")
+                logger.info(
+                    f"Injecting filters into search: authors={effective_authors}, works={effective_works}"
+                )
 
             # Call the original implementation with injected filters
-            return _search_ccel_database_impl(query, effective_authors, effective_works, top_k)
+            return _search_ccel_database_impl(
+                query, effective_authors, effective_works, top_k
+            )
 
         # Create the tool with the same interface as the original
         return StructuredTool.from_function(
@@ -149,7 +170,7 @@ class TheologicalAgent:
             name="search_ccel_database",
             description=search_ccel_database.description,
             args_schema=SearchCCELInput,
-            return_direct=False
+            return_direct=False,
         )
 
     def _rebuild_agent(self):
@@ -168,18 +189,18 @@ class TheologicalAgent:
         system_prompt_with_filters = self._build_system_prompt_with_filters()
 
         # Create updated prompt template with current filters
-        current_prompt_template = ChatPromptTemplate.from_messages([
-            ("system", system_prompt_with_filters),
-            MessagesPlaceholder(variable_name="chat_history", optional=True),
-            ("human", "{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad")
-        ])
+        current_prompt_template = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_prompt_with_filters),
+                MessagesPlaceholder(variable_name="chat_history", optional=True),
+                ("human", "{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ]
+        )
 
         # Create the agent with updated tools and prompt
         self.agent = create_tool_calling_agent(
-            llm=self.llm,
-            tools=self.tools,
-            prompt=current_prompt_template
+            llm=self.llm, tools=self.tools, prompt=current_prompt_template
         )
 
         # Create agent executor (reuses existing memory)
@@ -192,7 +213,7 @@ class TheologicalAgent:
             max_execution_time=120,
             early_stopping_method="force",
             handle_parsing_errors="Check your output format. You MUST include 'Final Answer:' in EVERY response, even for simple greetings. Follow the pattern: Thought: [reasoning]\nFinal Answer: [response]",
-            return_intermediate_steps=True
+            return_intermediate_steps=True,
         )
 
     def _extract_text_from_content(self, content: Any) -> str:
@@ -216,17 +237,22 @@ class TheologicalAgent:
             # Extract text from all text blocks
             text_parts = []
             for block in content:
-                if isinstance(block, dict) and block.get('type') == 'text':
-                    text_parts.append(block.get('text', ''))
+                if isinstance(block, dict) and block.get("type") == "text":
+                    text_parts.append(block.get("text", ""))
                 elif isinstance(block, str):
                     # Handle simple string items in list
                     text_parts.append(block)
-            return ' '.join(text_parts)
+            return " ".join(text_parts)
         else:
             logger.warning(f"Unexpected content type: {type(content)}")
             return str(content)
 
-    def query(self, question: str, authors: Optional[List[str]] = None, works: Optional[List[str]] = None) -> Dict[str, Any]:
+    def query(
+        self,
+        question: str,
+        authors: Optional[List[str]] = None,
+        works: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
         """
         Process a theological question and return a structured response.
 
@@ -243,7 +269,9 @@ class TheologicalAgent:
             logger.debug(f"Filters - Authors: {authors}, Works: {works}")
 
             # Update current filters if they've changed
-            filters_changed = (self.current_authors != authors or self.current_works != works)
+            filters_changed = (
+                self.current_authors != authors or self.current_works != works
+            )
 
             if filters_changed:
                 self.current_authors = authors
@@ -262,21 +290,28 @@ class TheologicalAgent:
             response = self.agent_executor.invoke({"input": question})
 
             # Extract the final answer (handle both string and list formats)
-            raw_answer = response.get("output", "I apologize, but I encountered an error processing your question.")
+            raw_answer = response.get(
+                "output",
+                "I apologize, but I encountered an error processing your question.",
+            )
             answer = self._extract_text_from_content(raw_answer)
 
             # Extract sources from tool usage in agent iterations and clean the answer
-            sources, cleaned_answer = self._extract_sources_from_tool_usage(response.get("intermediate_steps", []), answer)
+            sources, cleaned_answer = self._extract_sources_from_tool_usage(
+                response.get("intermediate_steps", []), answer
+            )
 
-            logger.info(f"Successfully processed theological query with {len(sources)} sources")
+            logger.info(
+                f"Successfully processed theological query with {len(sources)} sources"
+            )
 
             return {
                 "answer": cleaned_answer,
                 "sources": sources,
                 "metadata": {
                     "model": self.model_name,
-                    "agent_iterations": response.get("intermediate_steps", [])
-                }
+                    "agent_iterations": response.get("intermediate_steps", []),
+                },
             }
 
         except Exception as e:
@@ -284,11 +319,12 @@ class TheologicalAgent:
             return {
                 "answer": f"I apologize, but I encountered an error while processing your question: {str(e)}",
                 "sources": [],
-                "metadata": {"error": str(e)}
+                "metadata": {"error": str(e)},
             }
 
-
-    def _extract_sources_from_tool_usage(self, intermediate_steps: List, answer: str) -> tuple[List[Dict[str, str]], str]:
+    def _extract_sources_from_tool_usage(
+        self, intermediate_steps: List, answer: str
+    ) -> tuple[List[Dict[str, str]], str]:
         """
         Extract sources from actual tool usage in agent iterations.
         Returns record IDs only - links will be generated later by SourceFormatter.
@@ -303,7 +339,7 @@ class TheologicalAgent:
                 action, observation = step
 
                 # Check if this was a search_ccel_database action
-                if hasattr(action, 'tool') and action.tool == 'search_ccel_database':
+                if hasattr(action, "tool") and action.tool == "search_ccel_database":
                     try:
                         # observation should contain the search results
                         content = str(observation)
@@ -313,15 +349,19 @@ class TheologicalAgent:
                         import re
 
                         # Look for record_id patterns in the tool output
-                        record_id_matches = re.findall(r'record_id[\'"]?\s*:\s*[\'"]?(\w+)[\'"]?', content)
+                        record_id_matches = re.findall(
+                            r'record_id[\'"]?\s*:\s*[\'"]?(\w+)[\'"]?', content
+                        )
 
                         for record_id in record_id_matches:
                             if record_id:
-                                sources.append({
-                                    "citation": f"CCEL Record {record_id}",
-                                    "record_id": record_id
-                                    # Note: No link generation here - SourceFormatter will handle this
-                                })
+                                sources.append(
+                                    {
+                                        "citation": f"CCEL Record {record_id}",
+                                        "record_id": record_id,
+                                        # Note: No link generation here - SourceFormatter will handle this
+                                    }
+                                )
                     except Exception as e:
                         logger.error(f"Error extracting sources from tool usage: {e}")
 
@@ -330,7 +370,9 @@ class TheologicalAgent:
             return self._extract_sources_from_answer_text(answer)
 
         # If we got sources from tool usage, still clean the answer text
-        sources_from_text, cleaned_answer = self._extract_sources_from_answer_text(answer)
+        sources_from_text, cleaned_answer = self._extract_sources_from_answer_text(
+            answer
+        )
         return sources, cleaned_answer
 
     def _validate_and_fix_citation_numbers(self, answer: str, num_sources: int) -> str:
@@ -361,20 +403,20 @@ class TheologicalAgent:
         all_citation_nums = set()
 
         # Find all citation patterns
-        superscript_pattern = r'\[\[(\d+)\]\]\(#source-(\d+)\)'
-        markdown_pattern = r'\[([^\]]+)\]\(#source-(\d+)\)'
-        bare_pattern = r'#source-(\d+)(?!\d)'
+        superscript_pattern = r"\[\[(\d+)\]\]\(#source-(\d+)\)"
+        markdown_pattern = r"\[([^\]]+)\]\(#source-(\d+)\)"
+        bare_pattern = r"#source-(\d+)(?!\d)"
 
         for match in re.finditer(superscript_pattern, answer):
             all_citation_nums.add(int(match.group(2)))
 
         for match in re.finditer(markdown_pattern, answer):
-            if not re.match(r'\[\d+\]', match.group(1)):
+            if not re.match(r"\[\d+\]", match.group(1)):
                 all_citation_nums.add(int(match.group(2)))
 
         for match in re.finditer(bare_pattern, answer):
             start = match.start()
-            if start == 0 or answer[start-1] not in ['(', '[']:
+            if start == 0 or answer[start - 1] not in ["(", "["]:
                 all_citation_nums.add(int(match.group(1)))
 
         if not all_citation_nums:
@@ -410,7 +452,7 @@ class TheologicalAgent:
             source_num = int(match.group(2))
 
             new_num = citation_mapping.get(source_num, source_num)
-            return f'[[{new_num}]](#source-{new_num})'
+            return f"[[{new_num}]](#source-{new_num})"
 
         fixed_answer = re.sub(superscript_pattern, renumber_superscript, fixed_answer)
 
@@ -420,7 +462,7 @@ class TheologicalAgent:
             source_num = int(match.group(2))
 
             new_num = citation_mapping.get(source_num, source_num)
-            return f'[{text}](#source-{new_num})'
+            return f"[{text}](#source-{new_num})"
 
         fixed_answer = re.sub(markdown_pattern, renumber_markdown, fixed_answer)
 
@@ -429,15 +471,19 @@ class TheologicalAgent:
             source_num = int(match.group(1))
 
             new_num = citation_mapping.get(source_num, source_num)
-            return f'#source-{new_num}'
+            return f"#source-{new_num}"
 
         fixed_answer = re.sub(bare_pattern, renumber_bare, fixed_answer)
 
-        logger.info(f"Renumbered citations from {sorted_nums} to {list(range(1, len(sorted_nums) + 1))}")
+        logger.info(
+            f"Renumbered citations from {sorted_nums} to {list(range(1, len(sorted_nums) + 1))}"
+        )
 
         return fixed_answer
 
-    def _extract_sources_from_answer_text(self, answer: str) -> tuple[List[Dict[str, str]], str]:
+    def _extract_sources_from_answer_text(
+        self, answer: str
+    ) -> tuple[List[Dict[str, str]], str]:
         """
         Extract source citations from the answer text and remove the SOURCES section.
         First tries to parse the SOURCES section, then falls back to citation patterns.
@@ -447,11 +493,12 @@ class TheologicalAgent:
         """
         import re
         import json
+
         sources = []
         cleaned_answer = answer
 
         # First, try to extract the SOURCES section from the agent's answer
-        sources_pattern = r'SOURCES:\s*(\[.*?\])'
+        sources_pattern = r"SOURCES:\s*(\[.*?\])"
         sources_match = re.search(sources_pattern, answer, re.DOTALL)
 
         if sources_match:
@@ -463,35 +510,45 @@ class TheologicalAgent:
 
                 for source in sources_data:
                     if isinstance(source, dict):
-                        sources.append({
-                            "record_id": source.get("record_id", ""),
-                            "citation": source.get("citation", ""),
-                            "link": source.get("link", "")
-                        })
+                        sources.append(
+                            {
+                                "record_id": source.get("record_id", ""),
+                                "citation": source.get("citation", ""),
+                                "link": source.get("link", ""),
+                            }
+                        )
 
                 # Remove the SOURCES section from the answer
-                cleaned_answer = re.sub(r'\n*SOURCES:\s*\[.*?\]\s*$', '', answer, flags=re.DOTALL).strip()
+                cleaned_answer = re.sub(
+                    r"\n*SOURCES:\s*\[.*?\]\s*$", "", answer, flags=re.DOTALL
+                ).strip()
 
                 # Validate and fix citation numbers
-                cleaned_answer = self._validate_and_fix_citation_numbers(cleaned_answer, len(sources))
+                cleaned_answer = self._validate_and_fix_citation_numbers(
+                    cleaned_answer, len(sources)
+                )
 
-                logger.debug(f"Extracted {len(sources)} sources from SOURCES section and removed it from answer")
+                logger.debug(
+                    f"Extracted {len(sources)} sources from SOURCES section and removed it from answer"
+                )
                 return sources, cleaned_answer
 
             except (json.JSONDecodeError, Exception) as e:
                 logger.debug(f"Failed to parse SOURCES section: {e}")
 
         # Fallback to pattern matching for inline citations
-        citation_pattern = r'\(([^,]+),\s*([^)]+)\)'
+        citation_pattern = r"\(([^,]+),\s*([^)]+)\)"
         matches = re.findall(citation_pattern, answer)
 
         for match in matches:
             author, work = match
-            sources.append({
-                "citation": f"{author.strip()}, {work.strip()}",
-                "record_id": "",  # Would need to be extracted from tool usage
-                "link": f"https://www.ccel.org/search?q={author.strip().replace(' ', '+')}"
-            })
+            sources.append(
+                {
+                    "citation": f"{author.strip()}, {work.strip()}",
+                    "record_id": "",  # Would need to be extracted from tool usage
+                    "link": f"https://www.ccel.org/search?q={author.strip().replace(' ', '+')}",
+                }
+            )
 
         logger.debug(f"Extracted {len(sources)} sources from citation patterns")
         return sources, cleaned_answer
