@@ -4,23 +4,30 @@ LangChain tools for searching authors and works in the CCEL database.
 
 import logging
 from typing import List, Dict, Any
-from langchain.tools import tool
+from pydantic import BaseModel, Field
+from langchain_core.tools import StructuredTool
 
 from ...infrastructure.search.manticore import search_authors_semantic, search_works_semantic
 
 logger = logging.getLogger(__name__)
 
 
-@tool
-def search_ccel_authors(query: str) -> str:
+class AuthorSearchInput(BaseModel):
+    """Input schema for search_ccel_authors tool."""
+    query: str = Field(description="Author name or description to search for (e.g., 'Augustine', 'Aquinas', 'early church father')")
+
+
+class WorkSearchInput(BaseModel):
+    """Input schema for search_ccel_works tool."""
+    query: str = Field(description="Work title or description to search for (e.g., 'Confessions', 'City of God', 'book about prayer')")
+
+
+def _search_ccel_authors_impl(query: str) -> str:
     """
-    Search for authors in the Christian Classics Ethereal Library (CCEL) database using semantic search.
-    Uses AI embeddings to find authors most similar to the query, understanding meaning not just text similarity.
-    Returns matching authors with their IDs, names, and associated works.
-    Use this when the user mentions an author name to find the exact author ID for filtering searches.
+    Implementation of CCEL author search.
 
     Args:
-        query: Author name or description to search for (e.g., "Augustine", "Aquinas", "Luther", "early church father")
+        query: Author name or description to search for
 
     Returns:
         Matching authors with their IDs, names, and associated works
@@ -62,16 +69,12 @@ def search_ccel_authors(query: str) -> str:
         return f"Error occurred while searching authors: {str(e)}"
 
 
-@tool
-def search_ccel_works(query: str) -> str:
+def _search_ccel_works_impl(query: str) -> str:
     """
-    Search for works/titles in the Christian Classics Ethereal Library (CCEL) database using semantic search.
-    Uses AI embeddings to find works most similar to the query, understanding meaning not just text similarity.
-    Returns matching works with their IDs, names, and associated authors.
-    Use this when the user mentions a specific book or work title to find the exact work ID for filtering searches.
+    Implementation of CCEL works search.
 
     Args:
-        query: Work title or description to search for (e.g., "Confessions", "City of God", "Institutes", "book about prayer")
+        query: Work title or description to search for
 
     Returns:
         Matching works with their IDs, names, and associated authors
@@ -124,4 +127,21 @@ def search_ccel_works(query: str) -> str:
         logger.error(f"Error searching CCEL works: {str(e)}")
         return f"Error occurred while searching works: {str(e)}"
 
+
+# Create structured tools with Pydantic schemas for proper parameter parsing
+search_ccel_authors = StructuredTool.from_function(
+    func=_search_ccel_authors_impl,
+    name="search_ccel_authors",
+    description="""Search for authors in the Christian Classics Ethereal Library (CCEL) database using semantic search. Uses AI embeddings to find authors most similar to the query, understanding meaning not just text similarity. Returns matching authors with their IDs, names, and associated works. Use this when the user mentions an author name to find the exact author ID for filtering searches.""",
+    args_schema=AuthorSearchInput,
+    return_direct=False
+)
+
+search_ccel_works = StructuredTool.from_function(
+    func=_search_ccel_works_impl,
+    name="search_ccel_works",
+    description="""Search for works/titles in the Christian Classics Ethereal Library (CCEL) database using semantic search. Uses AI embeddings to find works most similar to the query, understanding meaning not just text similarity. Returns matching works with their IDs, names, and associated authors. Use this when the user mentions a specific book or work title to find the exact work ID for filtering searches.""",
+    args_schema=WorkSearchInput,
+    return_direct=False
+)
 

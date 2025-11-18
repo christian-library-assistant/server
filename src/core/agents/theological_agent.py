@@ -7,12 +7,12 @@ the CCEL database for relevant information.
 
 import logging
 from tabnanny import verbose
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional
 
 from langchain_anthropic import ChatAnthropic
-from langchain.agents import create_react_agent, AgentExecutor
+from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain.memory import ConversationBufferMemory
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from pydantic import SecretStr
 
@@ -30,7 +30,7 @@ class TheologicalAgent:
     provide reasoned responses to theological questions.
     """
 
-    def __init__(self, model_name: str = "claude-3-5-sonnet-20241022", temperature: float = 0.1):
+    def __init__(self, model_name: str = "claude-haiku-4-5", temperature: float = 0.1):
         """
         Initialize the theological agent.
 
@@ -47,8 +47,9 @@ class TheologicalAgent:
         # Initialize the LLM
         self.llm = ChatAnthropic(
             model_name=model_name,
-            timeout=10,
-            stop=["\n\nHuman:", "\n\nAssistant:"],
+            max_tokens=8192,  # Increased from default 1024 to allow comprehensive theological responses
+            timeout=30,  # Increased from 10 to 30 seconds to accommodate longer generation
+            stop=None,  # Let ReAct parser handle termination via format keywords
             verbose=True,
             temperature=temperature,
             api_key=SecretStr(ANTHROPIC_API_KEY)
@@ -66,7 +67,7 @@ class TheologicalAgent:
         self.prompt_template = self._create_prompt_template()
 
         # Create the agent
-        self.agent = create_react_agent(
+        self.agent = create_tool_calling_agent(
             llm=self.llm,
             tools=self.tools,
             prompt=self.prompt_template
@@ -83,31 +84,54 @@ class TheologicalAgent:
             tools=self.tools,
             verbose=True,
             memory=self.memory,
-            max_iterations=5,
-            early_stopping_method="force",
-            handle_parsing_errors=True
+            max_iterations=15,  # Prevent infinite loops
+            max_execution_time=120,  # 2 minute timeout
+            early_stopping_method="force",  # Force stop after max_iterations
+            handle_parsing_errors="Check your output format. You MUST include 'Final Answer:' in EVERY response, even for simple greetings. Follow the pattern: Thought: [reasoning]\nFinal Answer: [response]",
+            return_intermediate_steps=True  # For better debugging
         )
 
         logger.info(f"Initialized TheologicalAgent with model: {model_name}")
 
-    def _create_prompt_template(self) -> PromptTemplate:
+    def _create_prompt_template(self) -> ChatPromptTemplate:
         """Create a custom prompt template optimized for theological reasoning."""
-        return PromptTemplate(
-            template=THEOLOGICAL_AGENT_PROMPT_TEMPLATE,
-            input_variables=["input", "chat_history", "agent_scratchpad"],
-            partial_variables={"tools": self._format_tools(), "tool_names": self._get_tool_names()}
-        )
+        return ChatPromptTemplate.from_messages([
+            ("system", THEOLOGICAL_AGENT_PROMPT_TEMPLATE),
+            MessagesPlaceholder(variable_name="chat_history", optional=True),
+            ("human", "{input}"),
+            MessagesPlaceholder(variable_name="agent_scratchpad")
+        ])
 
-    def _format_tools(self) -> str:
-        """Format tools for the prompt."""
-        tool_strings = []
-        for tool in self.tools:
-            tool_strings.append(f"- {tool.name}: {tool.description}")
-        return "\n".join(tool_strings)
+    def _extract_text_from_content(self, content: Any) -> str:
+        """
+        Extract text from message content, handling both string and list formats.
 
-    def _get_tool_names(self) -> str:
-        """Get comma-separated tool names."""
-        return ", ".join([tool.name for tool in self.tools])
+        Tool-calling agents return content as list of content blocks:
+        [{'text': '...', 'type': 'text', 'index': 0}]
+
+        ReAct agents return simple strings.
+
+        Args:
+            content: Message content (string, list of content blocks, or other)
+
+        Returns:
+            Extracted text as string
+        """
+        if isinstance(content, str):
+            return content
+        elif isinstance(content, list):
+            # Extract text from all text blocks
+            text_parts = []
+            for block in content:
+                if isinstance(block, dict) and block.get('type') == 'text':
+                    text_parts.append(block.get('text', ''))
+                elif isinstance(block, str):
+                    # Handle simple string items in list
+                    text_parts.append(block)
+            return ' '.join(text_parts)
+        else:
+            logger.warning(f"Unexpected content type: {type(content)}")
+            return str(content)
 
     def _build_filter_context(self, authors: Optional[List[str]] = None, works: Optional[List[str]] = None) -> str:
         """
@@ -174,16 +198,17 @@ class TheologicalAgent:
             # Execute the agent with the full input
             response = self.agent_executor.invoke({"input": full_input})
 
-            # Extract the final answer
-            answer = response.get("output", "I apologize, but I encountered an error processing your question.")
+            # Extract the final answer (handle both string and list formats)
+            raw_answer = response.get("output", "I apologize, but I encountered an error processing your question.")
+            answer = self._extract_text_from_content(raw_answer)
 
-            # Extract sources from tool usage in agent iterations
-            sources = self._extract_sources_from_tool_usage(response.get("intermediate_steps", []), answer)
+            # Extract sources from tool usage in agent iterations and clean the answer
+            sources, cleaned_answer = self._extract_sources_from_tool_usage(response.get("intermediate_steps", []), answer)
 
             logger.info(f"Successfully processed theological query with {len(sources)} sources")
 
             return {
-                "answer": answer,
+                "answer": cleaned_answer,
                 "sources": sources,
                 "metadata": {
                     "model": self.model_name,
@@ -200,10 +225,13 @@ class TheologicalAgent:
             }
 
 
-    def _extract_sources_from_tool_usage(self, intermediate_steps: List, answer: str) -> List[Dict[str, str]]:
+    def _extract_sources_from_tool_usage(self, intermediate_steps: List, answer: str) -> tuple[List[Dict[str, str]], str]:
         """
         Extract sources from actual tool usage in agent iterations.
         Returns record IDs only - links will be generated later by SourceFormatter.
+
+        Returns:
+            Tuple of (sources list, cleaned answer text without SOURCES section)
         """
         sources = []
 
@@ -238,16 +266,126 @@ class TheologicalAgent:
         if not sources:
             return self._extract_sources_from_answer_text(answer)
 
-        return sources
+        # If we got sources from tool usage, still clean the answer text
+        sources_from_text, cleaned_answer = self._extract_sources_from_answer_text(answer)
+        return sources, cleaned_answer
 
-    def _extract_sources_from_answer_text(self, answer: str) -> List[Dict[str, str]]:
+    def _validate_and_fix_citation_numbers(self, answer: str, num_sources: int) -> str:
         """
-        Extract source citations from the answer text.
+        Intelligently renumber citations to match available sources.
+
+        Strategy: Collect all unique citation numbers used in the text, sort them,
+        and create a mapping from old numbers to sequential new numbers (1, 2, 3...).
+
+        Example: If agent uses citations [7, 6, 4, 1] with 4 sources:
+        - Sort unique numbers: [1, 4, 6, 7]
+        - Create mapping: {1→1, 4→2, 6→3, 7→4}
+        - Renumber citations accordingly
+
+        Args:
+            answer: The answer text with citations
+            num_sources: Number of sources in the SOURCES array
+
+        Returns:
+            Answer text with renumbered citations
+        """
+        if num_sources == 0:
+            return answer
+
+        import re
+
+        # Collect all unique citation numbers used in the text
+        all_citation_nums = set()
+
+        # Find all citation patterns
+        superscript_pattern = r'\[\[(\d+)\]\]\(#source-(\d+)\)'
+        markdown_pattern = r'\[([^\]]+)\]\(#source-(\d+)\)'
+        bare_pattern = r'#source-(\d+)(?!\d)'
+
+        for match in re.finditer(superscript_pattern, answer):
+            all_citation_nums.add(int(match.group(2)))
+
+        for match in re.finditer(markdown_pattern, answer):
+            if not re.match(r'\[\d+\]', match.group(1)):
+                all_citation_nums.add(int(match.group(2)))
+
+        for match in re.finditer(bare_pattern, answer):
+            start = match.start()
+            if start == 0 or answer[start-1] not in ['(', '[']:
+                all_citation_nums.add(int(match.group(1)))
+
+        if not all_citation_nums:
+            return answer
+
+        # Sort the citation numbers and create a mapping to sequential numbers
+        sorted_nums = sorted(all_citation_nums)
+
+        # Create mapping: old_num -> new_num (1, 2, 3, ...)
+        citation_mapping = {old_num: idx + 1 for idx, old_num in enumerate(sorted_nums)}
+
+        logger.info(f"Citation renumbering: {citation_mapping}")
+
+        # Check if we need to renumber (i.e., if citations don't match 1-N exactly)
+        needs_renumbering = sorted_nums != list(range(1, len(sorted_nums) + 1))
+
+        if not needs_renumbering and len(sorted_nums) == num_sources:
+            # Citations are already 1, 2, 3, ..., N - no changes needed
+            return answer
+
+        # Check if citation count matches source count
+        if len(sorted_nums) != num_sources:
+            logger.warning(
+                f"Citation count mismatch: Found {len(sorted_nums)} unique citations "
+                f"but have {num_sources} sources. Mapping: {citation_mapping}"
+            )
+
+        fixed_answer = answer
+
+        # Renumber superscript citations: [[N]](#source-N)
+        def renumber_superscript(match):
+            display_num = int(match.group(1))
+            source_num = int(match.group(2))
+
+            new_num = citation_mapping.get(source_num, source_num)
+            return f'[[{new_num}]](#source-{new_num})'
+
+        fixed_answer = re.sub(superscript_pattern, renumber_superscript, fixed_answer)
+
+        # Renumber markdown citations: [text](#source-N)
+        def renumber_markdown(match):
+            text = match.group(1)
+            source_num = int(match.group(2))
+
+            new_num = citation_mapping.get(source_num, source_num)
+            return f'[{text}](#source-{new_num})'
+
+        fixed_answer = re.sub(markdown_pattern, renumber_markdown, fixed_answer)
+
+        # Renumber bare anchor references: #source-N
+        def renumber_bare(match):
+            source_num = int(match.group(1))
+
+            new_num = citation_mapping.get(source_num, source_num)
+            return f'#source-{new_num}'
+
+        fixed_answer = re.sub(bare_pattern, renumber_bare, fixed_answer)
+
+        logger.info(f"Renumbered citations from {sorted_nums} to {list(range(1, len(sorted_nums) + 1))}")
+
+        return fixed_answer
+
+    def _extract_sources_from_answer_text(self, answer: str) -> tuple[List[Dict[str, str]], str]:
+        """
+        Extract source citations from the answer text and remove the SOURCES section.
         First tries to parse the SOURCES section, then falls back to citation patterns.
+
+        Returns:
+            Tuple of (sources list, cleaned answer text without SOURCES section)
         """
         import re
         import json
         sources = []
+        cleaned_answer = answer
 
         # First, try to extract the SOURCES section from the agent's answer
         sources_pattern = r'SOURCES:\s*(\[.*?\])'
@@ -268,8 +406,14 @@ class TheologicalAgent:
                             "link": source.get("link", "")
                         })
 
-                logger.debug(f"Extracted {len(sources)} sources from SOURCES section")
-                return sources
+                # Remove the SOURCES section from the answer
+                cleaned_answer = re.sub(r'\n*SOURCES:\s*\[.*?\]\s*$', '', answer, flags=re.DOTALL).strip()
+
+                # Validate and fix citation numbers
+                cleaned_answer = self._validate_and_fix_citation_numbers(cleaned_answer, len(sources))
+
+                logger.debug(f"Extracted {len(sources)} sources from SOURCES section and removed it from answer")
+                return sources, cleaned_answer
 
             except (json.JSONDecodeError, Exception) as e:
                 logger.debug(f"Failed to parse SOURCES section: {e}")
@@ -287,7 +431,7 @@ class TheologicalAgent:
             })
 
         logger.debug(f"Extracted {len(sources)} sources from citation patterns")
-        return sources
+        return sources, cleaned_answer
 
     def get_conversation_history(self) -> List[Dict[str, str]]:
         """Get the current conversation history from memory."""
@@ -296,9 +440,13 @@ class TheologicalAgent:
             messages = self.memory.chat_memory.messages
             for message in messages:
                 if isinstance(message, HumanMessage):
-                    history.append({"role": "user", "content": message.content})
+                    # Extract text from content (handles both string and list formats)
+                    content = self._extract_text_from_content(message.content)
+                    history.append({"role": "user", "content": content})
                 elif isinstance(message, AIMessage):
-                    history.append({"role": "assistant", "content": message.content})
+                    # Extract text from content (handles both string and list formats)
+                    content = self._extract_text_from_content(message.content)
+                    history.append({"role": "assistant", "content": content})
 
         except Exception as e:
             logger.error(f"Error retrieving conversation history: {e}")

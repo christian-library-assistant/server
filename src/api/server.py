@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .endpoints import router
 from ..config.settings import ANTHROPIC_API_KEY, IS_DEVELOPMENT
 from ..infrastructure.ai_clients.anthropic import AnthropicClient
+from ..core.agents.session_manager import AgentSessionManager
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,10 @@ def create_app() -> FastAPI:
 
     # Store the client in app state for dependency injection
     app.state.anthropic_client = anthropic_client
+
+    # Initialize session manager as singleton at application startup
+    app.state.session_manager = AgentSessionManager()
+    logger.info("Initialized AgentSessionManager at application startup")
 
     # Include API routes
     app.include_router(router)

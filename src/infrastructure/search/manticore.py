@@ -27,7 +27,7 @@ def get_all_works() -> Union[List[Dict[str, Any]], Dict[str, str]]:
         works_url = f"{base_url}/works.php"
 
         logger.debug(f"Fetching all works from: {works_url}")
-        response = requests.get(works_url, timeout=10)
+        response = requests.get(works_url, timeout=30)
         response.raise_for_status()
 
         try:
@@ -68,7 +68,7 @@ def search_works_semantic(work_query: str) -> Union[List[Dict[str, Any]], Dict[s
         params = {"work": work_query}
 
         logger.debug(f"Performing semantic search for work: {work_query}")
-        response = requests.get(works_url, params=params, timeout=10)
+        response = requests.get(works_url, params=params, timeout=30)
         response.raise_for_status()
 
         try:
@@ -101,7 +101,7 @@ def get_all_authors() -> Union[List[Dict[str, Any]], Dict[str, str]]:
         authors_url = f"{base_url}/authors.php"
 
         logger.debug(f"Fetching all authors from: {authors_url}")
-        response = requests.get(authors_url, timeout=10)
+        response = requests.get(authors_url, timeout=30)
         response.raise_for_status()
 
         try:
@@ -142,7 +142,7 @@ def search_authors_semantic(author_query: str) -> Union[Dict[str, Any], Dict[str
         params = {"author": author_query}
 
         logger.debug(f"Performing semantic search for author: {author_query}")
-        response = requests.get(authors_url, params=params, timeout=10)
+        response = requests.get(authors_url, params=params, timeout=30)
         response.raise_for_status()
 
         try:
@@ -218,32 +218,24 @@ def get_paragraphs(request: UserQuery) -> Union[List[Dict[str, str]], Dict[str, 
                 "answer": "Search service is not configured. Please contact administrator.",
             }
 
-        # Build query parameters
-        params = {
-            "text": request.query,
-            "returnLimit": request.top_k or 5
-        }
+        # Build query parameters using a list for array parameters
+        # requests library will automatically format works[]=value&works[]=value2
+        params = [
+            ("text", request.query),
+            ("returnAmount", request.top_k or 5)
+        ]
 
-        # Build array parameters for works[] and authors[]
-        work_params = []
+        # Add array parameters for works[] and authors[]
         if hasattr(request, 'works') and request.works:
-            work_params = [f"works[]={work}" for work in request.works]
+            for work in request.works:
+                params.append(("works[]", work))
 
-        author_params = []
         if hasattr(request, 'authors') and request.authors:
-            author_params = [f"authors[]={author}" for author in request.authors]
+            for author in request.authors:
+                params.append(("authors[]", author))
 
-        # Build the final URL with array parameters
-        base_params = urlencode(params)
-        array_params = "&".join(work_params + author_params)
-
-        if array_params:
-            final_url = f"{MANTICORE_API_URL}?{base_params}&{array_params}"
-        else:
-            final_url = f"{MANTICORE_API_URL}?{base_params}"
-
-        logger.debug(f"Making request to Manticore API: {final_url}")
-        response = requests.get(final_url, timeout=10)
+        logger.debug(f"Making request to Manticore API: {MANTICORE_API_URL} with params: {params}")
+        response = requests.get(MANTICORE_API_URL, params=params, timeout=30)
         logger.debug(f"Manticore API response status: {response.status_code}")
 
         # Check for HTTP errors

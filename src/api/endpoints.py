@@ -3,7 +3,13 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Request, Header
 
 from ..models.schemas import UserQuery, AssistantResponse, TestQueryRequest, TestResponse
-from ..infrastructure.search.manticore import clean_manticore_response, get_all_authors, get_all_works
+from ..infrastructure.search.manticore import (
+    clean_manticore_response,
+    get_all_authors,
+    get_all_works,
+    search_authors_semantic,
+    search_works_semantic
+)
 from ..infrastructure.ai_clients.base import AIClient
 from ..core.agents.session_manager import AgentSessionManager
 from ..core.services.rag_service import RegularRAGService
@@ -30,9 +36,6 @@ def get_ai_client(request: Request) -> AIClient:
 
 def get_session_manager(request: Request) -> AgentSessionManager:
     """Dependency to get the session manager from app state."""
-    if not hasattr(request.app.state, 'session_manager'):
-        # Initialize the session manager if it doesn't exist
-        request.app.state.session_manager = AgentSessionManager()
     return request.app.state.session_manager
 
 
@@ -150,7 +153,13 @@ async def reset_agent_conversation(
         if success:
             return {"message": "Agent conversation reset successfully", "session_id": session_id}
         else:
-            raise HTTPException(status_code=404, detail="Session not found")
+            # Return success for non-existent sessions (idempotent operation)
+            # Sessions are only created when first query is sent
+            return {
+                "message": "Session reset successful (session did not exist or already empty)",
+                "session_id": session_id,
+                "note": "Sessions are created when you send your first query"
+            }
 
     except HTTPException:
         raise
@@ -176,7 +185,13 @@ async def delete_agent_session(
         if success:
             return {"message": "Session deleted successfully", "session_id": session_id}
         else:
-            raise HTTPException(status_code=404, detail="Session not found")
+            # Return success for non-existent sessions (idempotent operation)
+            # Sessions are only created when first query is sent
+            return {
+                "message": "Session deletion successful (session did not exist)",
+                "session_id": session_id,
+                "note": "Sessions are created when you send your first query"
+            }
 
     except HTTPException:
         raise
@@ -327,8 +342,6 @@ async def search_authors(query: Optional[str] = None):
             }
 
         # Perform semantic search
-        from ...infrastructure.search.manticore import search_authors_semantic
-
         authors_data = search_authors_semantic(query)
 
         # Handle error case
@@ -418,8 +431,6 @@ async def search_works(query: Optional[str] = None):
             }
 
         # Perform semantic search
-        from ...infrastructure.search.manticore import search_works_semantic
-
         works_data = search_works_semantic(query)
 
         # Handle error case

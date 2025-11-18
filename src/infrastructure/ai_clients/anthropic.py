@@ -1,3 +1,6 @@
+
+
+#deprecated file src/infrastructure/ai_clients/anthropic.py
 import anthropic
 import logging
 from typing import List, Dict, Any, Optional
@@ -126,10 +129,10 @@ class AnthropicClient(AIClient):
                         }
                         response_text = response_data.get('answer', '')
 
-                        logger.debug(f"Extracted structured response: answer={len(response_text)} chars, sources={len(response_data['sources'])}")
+                        #logger.debug(f"Extracted structured response: answer={len(response_text)} chars, sources={len(response_data['sources'])}")
                     except Exception as e:
                         logger.error(f"Error extracting structured response: {e}")
-                        logger.debug(f"Input type: {type(content_block.input)}, Input: {content_block.input}")
+                        #logger.debug(f"Input type: {type(content_block.input)}, Input: {content_block.input}")
                         response_text = ""
 
         logger.debug(f"Claude response received (length: {len(response_text)})")
