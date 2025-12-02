@@ -13,6 +13,7 @@ from ...infrastructure.ai_clients.base import AIClient
 from ...infrastructure.search.manticore import get_paragraphs
 from ...infrastructure.parsers.response_handler import clean_ai_response
 from .source_formatter import SourceFormatter
+from .token_usage_tracker import get_token_tracker
 from ...prompts.system_prompts import get_theological_system_prompt, format_user_prompt
 
 logger = logging.getLogger(__name__)
@@ -63,6 +64,9 @@ class RegularRAGService:
             ai_response = self._get_ai_response(
                 system_prompt, user_prompt, request.query, request.conversation_history
             )
+
+            # Track token usage
+            self._track_token_usage(ai_response)
 
             # Process and format the response
             answer_text, formatted_sources = self._process_ai_response(ai_response)
@@ -232,6 +236,36 @@ class RegularRAGService:
                 {"role": "user", "content": query},
                 {"role": "assistant", "content": answer_text}
             ]
+
+    def _track_token_usage(self, ai_response: Dict[str, Any]):
+        """
+        Track token usage from AI response.
+
+        Args:
+            ai_response: AI response containing metadata with usage info
+        """
+        try:
+            metadata = ai_response.get("metadata", {})
+            usage = metadata.get("usage", {})
+
+            if usage:
+                input_tokens = usage.get("input_tokens", 0)
+                output_tokens = usage.get("output_tokens", 0)
+                model = metadata.get("model", "unknown")
+
+                tracker = get_token_tracker()
+                tracker.record_usage(
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    endpoint="/query",
+                    model=model
+                )
+
+                logger.debug(
+                    f"Tracked token usage: input={input_tokens}, output={output_tokens}"
+                )
+        except Exception as e:
+            logger.error(f"Error tracking token usage: {e}")
 
     def _log_response_metadata(self, ai_response: Dict[str, Any]):
         """

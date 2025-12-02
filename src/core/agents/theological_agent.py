@@ -15,6 +15,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langchain_core.tools import StructuredTool
+from langchain_core.callbacks.base import BaseCallbackHandler
 from pydantic import SecretStr
 
 from ..tools.manticore_tool import (
@@ -252,6 +253,7 @@ class TheologicalAgent:
         question: str,
         authors: Optional[List[str]] = None,
         works: Optional[List[str]] = None,
+        callbacks: Optional[List[BaseCallbackHandler]] = None,
     ) -> Dict[str, Any]:
         """
         Process a theological question and return a structured response.
@@ -260,6 +262,7 @@ class TheologicalAgent:
             question: The theological question or query
             authors: Optional list of author IDs to filter search results
             works: Optional list of work IDs to filter search results
+            callbacks: Optional list of callback handlers for tracking
 
         Returns:
             Dictionary containing the response and sources
@@ -283,11 +286,19 @@ class TheologicalAgent:
             # We rebuild on every query (not just when filters change) to ensure consistency
             self._rebuild_agent()
 
+            # Prepare invoke config with callbacks if provided
+            invoke_config = {}
+            if callbacks:
+                invoke_config["callbacks"] = callbacks
+
             # Execute the agent with the pure question
             # Filter context is already baked into the agent's prompt template (via _rebuild_agent)
             # This gives agent awareness without polluting conversation history
             # Filters will also be automatically injected when the search tool is called
-            response = self.agent_executor.invoke({"input": question})
+            response = self.agent_executor.invoke(
+                {"input": question},
+                config=invoke_config if invoke_config else None
+            )
 
             # Extract the final answer (handle both string and list formats)
             raw_answer = response.get(

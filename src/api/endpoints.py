@@ -15,6 +15,7 @@ from ..core.agents.session_manager import AgentSessionManager
 from ..core.services.rag_service import RegularRAGService
 from ..core.services.agent_service import AgentRAGService
 from ..core.services.test_service import TestService
+from ..core.services.token_usage_tracker import get_token_tracker
 from ..config.settings import MANTICORE_API_URL, IS_DEVELOPMENT
 
 import requests
@@ -501,3 +502,113 @@ async def search_works(query: Optional[str] = None):
     except Exception as e:
         logger.error(f"Error searching works: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error searching works: {str(e)}")
+
+
+# ============================================================================
+# Token Usage Statistics Endpoints
+# ============================================================================
+
+@router.get("/stats/usage")
+async def get_token_usage_summary(days: int = 30):
+    """
+    📊 **Get Token Usage Summary**
+
+    Returns aggregated token usage statistics for the specified period.
+
+    **Parameters:**
+    - `days`: Number of days to include in summary (default: 30, max: 365)
+
+    **Response includes:**
+    - Total input/output tokens
+    - Breakdown by endpoint (/query, /query-agent)
+    - Breakdown by model
+    - Daily averages
+
+    **Examples:**
+    - `GET /stats/usage` - Last 30 days summary
+    - `GET /stats/usage?days=7` - Last 7 days summary
+    """
+    try:
+        # Validate days parameter
+        if days < 1:
+            days = 1
+        elif days > 365:
+            days = 365
+
+        tracker = get_token_tracker()
+        summary = tracker.get_usage_summary(days=days)
+
+        return {
+            "status": "success",
+            "data": summary
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting token usage summary: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting usage statistics: {str(e)}")
+
+
+@router.get("/stats/usage/daily")
+async def get_daily_token_usage(days: int = 30):
+    """
+    📈 **Get Daily Token Usage Breakdown**
+
+    Returns day-by-day token usage for the specified period.
+
+    **Parameters:**
+    - `days`: Number of days to include (default: 30, max: 90)
+
+    **Response includes:**
+    - Daily input/output tokens
+    - Daily request counts
+    - Per-endpoint breakdown for each day
+
+    **Examples:**
+    - `GET /stats/usage/daily` - Last 30 days daily breakdown
+    - `GET /stats/usage/daily?days=7` - Last 7 days daily breakdown
+    """
+    try:
+        # Validate days parameter
+        if days < 1:
+            days = 1
+        elif days > 90:
+            days = 90
+
+        tracker = get_token_tracker()
+        daily_data = tracker.get_daily_breakdown(days=days)
+
+        return {
+            "status": "success",
+            "days_requested": days,
+            "data": daily_data
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting daily token usage: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting daily statistics: {str(e)}")
+
+
+@router.get("/stats/usage/today")
+async def get_today_token_usage():
+    """
+    📅 **Get Today's Token Usage**
+
+    Returns token usage statistics for today only.
+
+    **Response includes:**
+    - Today's input/output tokens
+    - Request count
+    - Per-endpoint breakdown
+    """
+    try:
+        tracker = get_token_tracker()
+        today_data = tracker.get_today_usage()
+
+        return {
+            "status": "success",
+            "data": today_data
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting today's token usage: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting today's statistics: {str(e)}")

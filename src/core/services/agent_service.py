@@ -10,7 +10,9 @@ from typing import Dict, Any, Optional
 
 from ...models.schemas import UserQuery, AssistantResponse
 from ..agents.session_manager import AgentSessionManager
+from ..callbacks.token_usage_callback import TokenUsageCallbackHandler
 from .source_formatter import SourceFormatter
+from .token_usage_tracker import get_token_tracker
 
 logger = logging.getLogger(__name__)
 
@@ -56,12 +58,19 @@ class AgentRAGService:
             session_id, theological_agent = self.session_manager.get_or_create_session(session_id)
             logger.debug(f"Using session: {session_id}")
 
+            # Create callback handler for token tracking
+            token_callback = TokenUsageCallbackHandler(endpoint="/query-agent")
+
             # Query the agent with optional filters (conversation history is maintained in agent memory)
             agent_response = theological_agent.query(
                 question=request.query,
                 authors=request.authors,
-                works=request.works
+                works=request.works,
+                callbacks=[token_callback]
             )
+
+            # Track token usage from the callback
+            self._track_token_usage(token_callback)
 
             # Extract response components
             answer_text = agent_response.get("answer", "")
@@ -191,3 +200,29 @@ class AgentRAGService:
         except Exception as e:
             logger.error(f"Error getting session count: {str(e)}")
             return 0
+
+    def _track_token_usage(self, callback: TokenUsageCallbackHandler):
+        """
+        Track token usage from the callback handler.
+
+        Args:
+            callback: Token usage callback handler with accumulated usage
+        """
+        try:
+            usage = callback.get_total_usage()
+
+            if usage["total_tokens"] > 0:
+                tracker = get_token_tracker()
+                tracker.record_usage(
+                    input_tokens=usage["input_tokens"],
+                    output_tokens=usage["output_tokens"],
+                    endpoint=usage["endpoint"],
+                    model=usage["model"]
+                )
+
+                logger.debug(
+                    f"Tracked agent token usage: input={usage['input_tokens']}, "
+                    f"output={usage['output_tokens']}, calls={usage['call_count']}"
+                )
+        except Exception as e:
+            logger.error(f"Error tracking token usage: {e}")
