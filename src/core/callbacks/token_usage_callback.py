@@ -64,6 +64,7 @@ class TokenUsageCallbackHandler(BaseCallbackHandler):
         """
         try:
             self.call_count += 1
+            usage_found = False
 
             # Try to get token usage from llm_output (standard location)
             if response.llm_output:
@@ -73,9 +74,10 @@ class TokenUsageCallbackHandler(BaseCallbackHandler):
                     output_tokens = usage.get("output_tokens", 0)
                     self.total_input_tokens += input_tokens
                     self.total_output_tokens += output_tokens
+                    usage_found = True
 
                     logger.debug(
-                        f"LLM call #{self.call_count}: "
+                        f"LLM call #{self.call_count} (llm_output): "
                         f"input={input_tokens}, output={output_tokens}"
                     )
 
@@ -85,33 +87,46 @@ class TokenUsageCallbackHandler(BaseCallbackHandler):
                 elif "model" in response.llm_output:
                     self.model_name = response.llm_output["model"]
 
-            # Also try to get usage from generation metadata (for some providers)
+            # Try to get usage from generation metadata
             for generation_list in response.generations:
                 for generation in generation_list:
-                    if hasattr(generation, "generation_info") and generation.generation_info:
-                        usage = generation.generation_info.get("usage", {})
-                        if usage and not response.llm_output:
-                            # Only use this if llm_output didn't have usage
-                            input_tokens = usage.get("input_tokens", 0)
-                            output_tokens = usage.get("output_tokens", 0)
-                            self.total_input_tokens += input_tokens
-                            self.total_output_tokens += output_tokens
-
-                    # Check message response_metadata for ChatModels
+                    # Check message for ChatModels (ChatAnthropic)
                     if hasattr(generation, "message") and generation.message:
                         msg = generation.message
-                        if hasattr(msg, "response_metadata") and msg.response_metadata:
+
+                        # Method 1: Check usage_metadata (newer LangChain API)
+                        if not usage_found and hasattr(msg, "usage_metadata") and msg.usage_metadata:
+                            usage_meta = msg.usage_metadata
+                            # usage_metadata can be dict or object
+                            if isinstance(usage_meta, dict):
+                                input_tokens = usage_meta.get("input_tokens", 0)
+                                output_tokens = usage_meta.get("output_tokens", 0)
+                            else:
+                                input_tokens = getattr(usage_meta, "input_tokens", 0)
+                                output_tokens = getattr(usage_meta, "output_tokens", 0)
+
+                            if input_tokens or output_tokens:
+                                self.total_input_tokens += input_tokens
+                                self.total_output_tokens += output_tokens
+                                usage_found = True
+
+                                logger.debug(
+                                    f"LLM call #{self.call_count} (usage_metadata): "
+                                    f"input={input_tokens}, output={output_tokens}"
+                                )
+
+                        # Method 2: Check response_metadata["usage"] (fallback)
+                        if not usage_found and hasattr(msg, "response_metadata") and msg.response_metadata:
                             usage = msg.response_metadata.get("usage", {})
                             if usage:
                                 input_tokens = usage.get("input_tokens", 0)
                                 output_tokens = usage.get("output_tokens", 0)
-                                # Only add if not already counted from llm_output
-                                if not response.llm_output or not response.llm_output.get("usage"):
-                                    self.total_input_tokens += input_tokens
-                                    self.total_output_tokens += output_tokens
+                                self.total_input_tokens += input_tokens
+                                self.total_output_tokens += output_tokens
+                                usage_found = True
 
                                 logger.debug(
-                                    f"From response_metadata: "
+                                    f"LLM call #{self.call_count} (response_metadata): "
                                     f"input={input_tokens}, output={output_tokens}"
                                 )
 
@@ -119,8 +134,28 @@ class TokenUsageCallbackHandler(BaseCallbackHandler):
                             if "model" in msg.response_metadata:
                                 self.model_name = msg.response_metadata["model"]
 
+                    # Method 3: Check generation_info (older API)
+                    if not usage_found and hasattr(generation, "generation_info") and generation.generation_info:
+                        usage = generation.generation_info.get("usage", {})
+                        if usage:
+                            input_tokens = usage.get("input_tokens", 0)
+                            output_tokens = usage.get("output_tokens", 0)
+                            self.total_input_tokens += input_tokens
+                            self.total_output_tokens += output_tokens
+                            usage_found = True
+
+                            logger.debug(
+                                f"LLM call #{self.call_count} (generation_info): "
+                                f"input={input_tokens}, output={output_tokens}"
+                            )
+
+            if not usage_found:
+                logger.warning(
+                    f"LLM call #{self.call_count}: No usage data found in response"
+                )
+
         except Exception as e:
-            logger.error(f"Error extracting token usage: {e}")
+            logger.error(f"Error extracting token usage: {e}", exc_info=True)
 
     def on_llm_error(
         self,
