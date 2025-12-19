@@ -1,0 +1,301 @@
+id,query,subject,expected_record_id
+1,How was repentance practiced in the early church?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.23-p1
+2,What do early writings reveal about holiness?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.22-p1
+3,What do early writings reveal about scripture?,Scripture,ccel/s/schaff/anf01.xml:ii.ii.50-p1
+4,What do early writings reveal about pride?,Pride,ccel/s/schaff/anf01.xml:ii.ii.34-p1
+5,What does early theology say concerning patience?,Patience,ccel/s/schaff/anf01.xml:ii.ii.15-p1
+6,How was creation practiced in the early church?,Creation,ccel/s/schaff/anf01.xml:ii.ii.7-p1
+7,What do early writings reveal about courage?,Courage,ccel/s/schaff/anf01.xml:ii.ii.39-p1
+8,What do the early church fathers teach about pride?,Pride,ccel/s/schaff/anf01.xml:ii.ii.4-p1
+9,How was charity practiced in the early church?,Charity,ccel/s/schaff/anf01.xml:ii.ii.34-p1
+10,How was faith practiced in the early church?,Faith,ccel/s/schaff/anf01.xml:ii.ii.42-p1
+11,How is truth understood in early Christian theology?,Truth,ccel/s/schaff/anf01.xml:ii.ii.19-p1
+12,How is creation understood in early Christian theology?,Creation,ccel/s/schaff/anf01.xml:ii.ii.12-p1
+13,How is scripture understood in early Christian theology?,Scripture,ccel/s/schaff/anf01.xml:ii.ii.12-p1
+14,How is peace understood in early Christian theology?,Peace,ccel/s/schaff/anf01.xml:ii.ii.34-p1
+15,What do the early church fathers teach about righteousness?,Righteousness,ccel/s/schaff/anf01.xml:ii.ii.17-p1
+16,What does early theology say concerning love?,Love,ccel/s/schaff/anf01.xml:ii.ii.33-p1
+17,What do early writings reveal about divine providence?,Divine Providence,ccel/s/schaff/anf01.xml:ii.ii.29-p1
+18,How is unity understood in early Christian theology?,Unity,ccel/s/schaff/anf01.xml:ii.ii.3-p1
+19,What does early theology say concerning resurrection?,Resurrection,ccel/s/schaff/anf01.xml:ii.ii.15-p1
+20,What do the early church fathers teach about mercy?,Mercy,ccel/s/schaff/anf01.xml:ii.ii.37-p1
+21,How was pride practiced in the early church?,Pride,ccel/s/schaff/anf01.xml:ii.ii.3-p1
+22,How was trinity practiced in the early church?,Trinity,ccel/s/schaff/anf01.xml:ii.ii.35-p1
+23,What do early writings reveal about leadership?,Leadership,ccel/s/schaff/anf01.xml:ii.ii.44-p1
+24,How was baptism practiced in the early church?,Baptism,ccel/s/schaff/anf01.xml:ii.ii.9-p1
+25,What do early writings reveal about unity?,Unity,ccel/s/schaff/anf01.xml:ii.ii.41-p1
+26,What do early writings reveal about discipline?,Discipline,ccel/s/schaff/anf01.xml:ii.ii.47-p1
+27,How is patience understood in early Christian theology?,Patience,ccel/s/schaff/anf01.xml:ii.ii.33-p1
+28,What do early writings reveal about righteousness?,Righteousness,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+29,What does early theology say concerning grace?,Grace,ccel/s/schaff/anf01.xml:ii.ii.37-p1
+30,What do early writings reveal about peace?,Peace,ccel/s/schaff/anf01.xml:ii.ii.26-p1
+31,How is mercy understood in early Christian theology?,Mercy,ccel/s/schaff/anf01.xml:ii.ii.46-p1
+32,What does early theology say concerning wisdom?,Wisdom,ccel/s/schaff/anf01.xml:ii.ii.24-p1
+33,What does early theology say concerning peace?,Peace,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+34,What does early theology say concerning sacrifice?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.2-p1
+35,How was repentance practiced in the early church?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.50-p1
+36,What does early theology say concerning peace?,Peace,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+37,What does early theology say concerning baptism?,Baptism,ccel/s/schaff/anf01.xml:ii.ii.47-p1
+38,How is faith understood in early Christian theology?,Faith,ccel/s/schaff/anf01.xml:ii.ii.40-p1
+39,What does early theology say concerning truth?,Truth,ccel/s/schaff/anf01.xml:ii.ii.3-p1
+40,How is gospel understood in early Christian theology?,Gospel,ccel/s/schaff/anf01.xml:ii.ii.19-p1
+41,What do early writings reveal about sin?,Sin,ccel/s/schaff/anf01.xml:ii.ii.30-p1
+42,What do the early church fathers teach about purity?,Purity,ccel/s/schaff/anf01.xml:ii.ii.48-p1
+43,How was judgment practiced in the early church?,Judgment,ccel/s/schaff/anf01.xml:ii.ii.34-p1
+44,How is angels understood in early Christian theology?,Angels,ccel/s/schaff/anf01.xml:ii.ii.27-p1
+45,How was resurrection practiced in the early church?,Resurrection,ccel/s/schaff/anf01.xml:ii.ii.46-p1
+46,What do the early church fathers teach about faithfulness?,Faithfulness,ccel/s/schaff/anf01.xml:ii.ii.4-p1
+47,What do early writings reveal about charity?,Charity,ccel/s/schaff/anf01.xml:ii.ii.10-p1
+48,What does early theology say concerning hope?,Hope,ccel/s/schaff/anf01.xml:ii.ii.29-p1
+49,What do the early church fathers teach about trinity?,Trinity,ccel/s/schaff/anf01.xml:ii.ii.30-p1
+50,What do early writings reveal about judgment?,Judgment,ccel/s/schaff/anf01.xml:ii.ii.42-p1
+51,What does early theology say concerning pride?,Pride,ccel/s/schaff/anf01.xml:ii.ii.18-p1
+52,What do early writings reveal about sacrifice?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.41-p1
+53,What does early theology say concerning resurrection?,Resurrection,ccel/s/schaff/anf01.xml:ii.ii.31-p1
+54,How is leadership understood in early Christian theology?,Leadership,ccel/s/schaff/anf01.xml:ii.ii.15-p1
+55,What do early writings reveal about unity?,Unity,ccel/s/schaff/anf01.xml:ii.ii.46-p1
+56,How was scripture practiced in the early church?,Scripture,ccel/s/schaff/anf01.xml:ii.ii.33-p1
+57,What do early writings reveal about wisdom?,Wisdom,ccel/s/schaff/anf01.xml:ii.ii.48-p1
+58,How is resurrection understood in early Christian theology?,Resurrection,ccel/s/schaff/anf01.xml:ii.ii.32-p1
+59,How was love practiced in the early church?,Love,ccel/s/schaff/anf01.xml:ii.ii.2-p1
+60,What do early writings reveal about resurrection?,Resurrection,ccel/s/schaff/anf01.xml:ii.ii.34-p1
+61,What does early theology say concerning persecution?,Persecution,ccel/s/schaff/anf01.xml:ii.ii.45-p1
+62,What does early theology say concerning christology?,Christology,ccel/s/schaff/anf01.xml:ii.ii.28-p1
+63,What do early writings reveal about salvation?,Salvation,ccel/s/schaff/anf01.xml:ii.ii.15-p1
+64,What do early writings reveal about charity?,Charity,ccel/s/schaff/anf01.xml:ii.ii.48-p1
+65,How was prayer practiced in the early church?,Prayer,ccel/s/schaff/anf01.xml:ii.ii.10-p1
+66,What do early writings reveal about baptism?,Baptism,ccel/s/schaff/anf01.xml:ii.ii.13-p1
+67,What does early theology say concerning idolatry?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.31-p1
+68,How is angels understood in early Christian theology?,Angels,ccel/s/schaff/anf01.xml:ii.ii.45-p1
+69,How was righteousness practiced in the early church?,Righteousness,ccel/s/schaff/anf01.xml:ii.ii.21-p1
+70,What does early theology say concerning love?,Love,ccel/s/schaff/anf01.xml:ii.ii.38-p1
+71,What do the early church fathers teach about martyrdom?,Martyrdom,ccel/s/schaff/anf01.xml:ii.ii.11-p1
+72,What do early writings reveal about repentance?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.22-p1
+73,What does early theology say concerning grace?,Grace,ccel/s/schaff/anf01.xml:ii.ii.4-p1
+74,What do the early church fathers teach about obedience?,Obedience,ccel/s/schaff/anf01.xml:ii.ii.33-p1
+75,How was holiness practiced in the early church?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.6-p1
+76,What do early writings reveal about martyrdom?,Martyrdom,ccel/s/schaff/anf01.xml:ii.ii.50-p1
+77,What does early theology say concerning justice?,Justice,ccel/s/schaff/anf01.xml:ii.ii.28-p1
+78,What do early writings reveal about repentance?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.29-p1
+79,What do early writings reveal about angels?,Angels,ccel/s/schaff/anf01.xml:ii.ii.30-p1
+80,What does early theology say concerning mercy?,Mercy,ccel/s/schaff/anf01.xml:ii.ii.31-p1
+81,What do the early church fathers teach about angels?,Angels,ccel/s/schaff/anf01.xml:ii.ii.20-p1
+82,What do the early church fathers teach about forgiveness?,Forgiveness,ccel/s/schaff/anf01.xml:ii.ii.37-p1
+83,What do the early church fathers teach about grace?,Grace,ccel/s/schaff/anf01.xml:ii.ii.30-p1
+84,What do early writings reveal about grace?,Grace,ccel/s/schaff/anf01.xml:ii.ii.19-p1
+85,What do the early church fathers teach about resurrection?,Resurrection,ccel/s/schaff/anf01.xml:ii.ii.21-p1
+86,What do the early church fathers teach about sacrifice?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.34-p1
+87,How is unity understood in early Christian theology?,Unity,ccel/s/schaff/anf01.xml:ii.ii.36-p1
+88,How is idolatry understood in early Christian theology?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.30-p1
+89,What does early theology say concerning grace?,Grace,ccel/s/schaff/anf01.xml:ii.ii.29-p1
+90,How was grace practiced in the early church?,Grace,ccel/s/schaff/anf01.xml:ii.ii.14-p1
+91,How is pride understood in early Christian theology?,Pride,ccel/s/schaff/anf01.xml:ii.ii.37-p1
+92,What do early writings reveal about peace?,Peace,ccel/s/schaff/anf01.xml:ii.ii.50-p1
+93,How was temptation practiced in the early church?,Temptation,ccel/s/schaff/anf01.xml:ii.ii.16-p1
+94,How is martyrdom understood in early Christian theology?,Martyrdom,ccel/s/schaff/anf01.xml:ii.ii.5-p1
+95,How was repentance practiced in the early church?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.38-p1
+96,How was divine providence practiced in the early church?,Divine Providence,ccel/s/schaff/anf01.xml:ii.ii.7-p1
+97,How is sacrifice understood in early Christian theology?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.43-p1
+98,What do early writings reveal about pride?,Pride,ccel/s/schaff/anf01.xml:ii.ii.19-p1
+99,What does early theology say concerning hope?,Hope,ccel/s/schaff/anf01.xml:ii.ii.2-p1
+100,What does early theology say concerning pride?,Pride,ccel/s/schaff/anf01.xml:ii.ii.16-p1
+101,How was temptation practiced in the early church?,Temptation,ccel/s/schaff/anf01.xml:ii.ii.43-p1
+102,How was faithfulness practiced in the early church?,Faithfulness,ccel/s/schaff/anf01.xml:ii.ii.5-p1
+103,How was prayer practiced in the early church?,Prayer,ccel/s/schaff/anf01.xml:ii.ii.32-p1
+104,How was prayer practiced in the early church?,Prayer,ccel/s/schaff/anf01.xml:ii.ii.41-p1
+105,How was martyrdom practiced in the early church?,Martyrdom,ccel/s/schaff/anf01.xml:ii.ii.16-p1
+106,How was justice practiced in the early church?,Justice,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+107,How is obedience understood in early Christian theology?,Obedience,ccel/s/schaff/anf01.xml:ii.ii.46-p1
+108,How was virtue practiced in the early church?,Virtue,ccel/s/schaff/anf01.xml:ii.ii.14-p1
+109,What do the early church fathers teach about holiness?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.37-p1
+110,How is trinity understood in early Christian theology?,Trinity,ccel/s/schaff/anf01.xml:ii.ii.18-p1
+111,How is virtue understood in early Christian theology?,Virtue,ccel/s/schaff/anf01.xml:ii.ii.33-p1
+112,What does early theology say concerning scripture?,Scripture,ccel/s/schaff/anf01.xml:ii.ii.1-p1
+113,What do early writings reveal about righteousness?,Righteousness,ccel/s/schaff/anf01.xml:ii.ii.41-p1
+114,How was sin practiced in the early church?,Sin,ccel/s/schaff/anf01.xml:ii.ii.28-p1
+115,How was sin practiced in the early church?,Sin,ccel/s/schaff/anf01.xml:ii.ii.27-p1
+116,What does early theology say concerning prayer?,Prayer,ccel/s/schaff/anf01.xml:ii.ii.36-p1
+117,What does early theology say concerning purity?,Purity,ccel/s/schaff/anf01.xml:ii.ii.21-p1
+118,What does early theology say concerning purity?,Purity,ccel/s/schaff/anf01.xml:ii.ii.9-p1
+119,How is peace understood in early Christian theology?,Peace,ccel/s/schaff/anf01.xml:ii.ii.10-p1
+120,What does early theology say concerning prayer?,Prayer,ccel/s/schaff/anf01.xml:ii.ii.10-p1
+121,What do the early church fathers teach about repentance?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.30-p1
+122,How was sacrifice practiced in the early church?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.45-p1
+123,What do early writings reveal about judgment?,Judgment,ccel/s/schaff/anf01.xml:ii.ii.31-p1
+124,How is idolatry understood in early Christian theology?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.46-p1
+125,How is demons understood in early Christian theology?,Demons,ccel/s/schaff/anf01.xml:ii.ii.48-p1
+126,How was forgiveness practiced in the early church?,Forgiveness,ccel/s/schaff/anf01.xml:ii.ii.19-p1
+127,What do the early church fathers teach about sin?,Sin,ccel/s/schaff/anf01.xml:ii.ii.19-p1
+128,What does early theology say concerning temptation?,Temptation,ccel/s/schaff/anf01.xml:ii.ii.13-p1
+129,How is grace understood in early Christian theology?,Grace,ccel/s/schaff/anf01.xml:ii.ii.15-p1
+130,How is faithfulness understood in early Christian theology?,Faithfulness,ccel/s/schaff/anf01.xml:ii.ii.11-p1
+131,How is unity understood in early Christian theology?,Unity,ccel/s/schaff/anf01.xml:ii.ii.42-p1
+132,What do the early church fathers teach about gospel?,Gospel,ccel/s/schaff/anf01.xml:ii.ii.23-p1
+133,What does early theology say concerning trinity?,Trinity,ccel/s/schaff/anf01.xml:ii.ii.19-p1
+134,How was idolatry practiced in the early church?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.21-p1
+135,How was truth practiced in the early church?,Truth,ccel/s/schaff/anf01.xml:ii.ii.49-p1
+136,What does early theology say concerning sacrifice?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.34-p1
+137,What does early theology say concerning divine providence?,Divine Providence,ccel/s/schaff/anf01.xml:ii.ii.12-p1
+138,What does early theology say concerning charity?,Charity,ccel/s/schaff/anf01.xml:ii.ii.12-p1
+139,How is sacrifice understood in early Christian theology?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.45-p1
+140,What does early theology say concerning idolatry?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.50-p1
+141,What do the early church fathers teach about temptation?,Temptation,ccel/s/schaff/anf01.xml:ii.ii.42-p1
+142,How is demons understood in early Christian theology?,Demons,ccel/s/schaff/anf01.xml:ii.ii.3-p1
+143,What do early writings reveal about repentance?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.24-p1
+144,What do early writings reveal about salvation?,Salvation,ccel/s/schaff/anf01.xml:ii.ii.46-p1
+145,What do the early church fathers teach about leadership?,Leadership,ccel/s/schaff/anf01.xml:ii.ii.12-p1
+146,How was sin practiced in the early church?,Sin,ccel/s/schaff/anf01.xml:ii.ii.5-p1
+147,What does early theology say concerning repentance?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.26-p1
+148,How was charity practiced in the early church?,Charity,ccel/s/schaff/anf01.xml:ii.ii.31-p1
+149,What do the early church fathers teach about justice?,Justice,ccel/s/schaff/anf01.xml:ii.ii.27-p1
+150,What do the early church fathers teach about baptism?,Baptism,ccel/s/schaff/anf01.xml:ii.ii.5-p1
+151,How was creation practiced in the early church?,Creation,ccel/s/schaff/anf01.xml:ii.ii.4-p1
+152,What does early theology say concerning sacrifice?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.22-p1
+153,How was salvation practiced in the early church?,Salvation,ccel/s/schaff/anf01.xml:ii.ii.14-p1
+154,What do the early church fathers teach about unity?,Unity,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+155,What does early theology say concerning wisdom?,Wisdom,ccel/s/schaff/anf01.xml:ii.ii.5-p1
+156,What do early writings reveal about virtue?,Virtue,ccel/s/schaff/anf01.xml:ii.ii.44-p1
+157,What do early writings reveal about justice?,Justice,ccel/s/schaff/anf01.xml:ii.ii.27-p1
+158,What do early writings reveal about sin?,Sin,ccel/s/schaff/anf01.xml:ii.ii.32-p1
+159,What do the early church fathers teach about judgment?,Judgment,ccel/s/schaff/anf01.xml:ii.ii.2-p1
+160,What do the early church fathers teach about unity?,Unity,ccel/s/schaff/anf01.xml:ii.ii.29-p1
+161,How is martyrdom understood in early Christian theology?,Martyrdom,ccel/s/schaff/anf01.xml:ii.ii.28-p1
+162,What do the early church fathers teach about forgiveness?,Forgiveness,ccel/s/schaff/anf01.xml:ii.ii.49-p1
+163,How is prayer understood in early Christian theology?,Prayer,ccel/s/schaff/anf01.xml:ii.ii.7-p1
+164,What does early theology say concerning idolatry?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.29-p1
+165,What do early writings reveal about gospel?,Gospel,ccel/s/schaff/anf01.xml:ii.ii.6-p1
+166,What do early writings reveal about mercy?,Mercy,ccel/s/schaff/anf01.xml:ii.ii.19-p1
+167,What do the early church fathers teach about patience?,Patience,ccel/s/schaff/anf01.xml:ii.ii.9-p1
+168,How was trinity practiced in the early church?,Trinity,ccel/s/schaff/anf01.xml:ii.ii.33-p1
+169,How is divine providence understood in early Christian theology?,Divine Providence,ccel/s/schaff/anf01.xml:ii.ii.31-p1
+170,How is sacrifice understood in early Christian theology?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.14-p1
+171,How is repentance understood in early Christian theology?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.21-p1
+172,How was holiness practiced in the early church?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.7-p1
+173,What does early theology say concerning faithfulness?,Faithfulness,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+174,What do early writings reveal about scripture?,Scripture,ccel/s/schaff/anf01.xml:ii.ii.49-p1
+175,How is temptation understood in early Christian theology?,Temptation,ccel/s/schaff/anf01.xml:ii.ii.11-p1
+176,How is idolatry understood in early Christian theology?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.42-p1
+177,What does early theology say concerning salvation?,Salvation,ccel/s/schaff/anf01.xml:ii.ii.9-p1
+178,What does early theology say concerning humility?,Humility,ccel/s/schaff/anf01.xml:ii.ii.11-p1
+179,What does early theology say concerning trinity?,Trinity,ccel/s/schaff/anf01.xml:ii.ii.41-p1
+180,What do the early church fathers teach about baptism?,Baptism,ccel/s/schaff/anf01.xml:ii.ii.29-p1
+181,What do early writings reveal about humility?,Humility,ccel/s/schaff/anf01.xml:ii.ii.36-p1
+182,How is idolatry understood in early Christian theology?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.34-p1
+183,What do early writings reveal about martyrdom?,Martyrdom,ccel/s/schaff/anf01.xml:ii.ii.4-p1
+184,How is scripture understood in early Christian theology?,Scripture,ccel/s/schaff/anf01.xml:ii.ii.5-p1
+185,How was repentance practiced in the early church?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.45-p1
+186,What does early theology say concerning trinity?,Trinity,ccel/s/schaff/anf01.xml:ii.ii.7-p1
+187,What do the early church fathers teach about love?,Love,ccel/s/schaff/anf01.xml:ii.ii.15-p1
+188,How is salvation understood in early Christian theology?,Salvation,ccel/s/schaff/anf01.xml:ii.ii.36-p1
+189,What does early theology say concerning holiness?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+190,How was sacrifice practiced in the early church?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.2-p1
+191,What do the early church fathers teach about wisdom?,Wisdom,ccel/s/schaff/anf01.xml:ii.ii.48-p1
+192,What do the early church fathers teach about truth?,Truth,ccel/s/schaff/anf01.xml:ii.ii.50-p1
+193,What do the early church fathers teach about humility?,Humility,ccel/s/schaff/anf01.xml:ii.ii.35-p1
+194,How was righteousness practiced in the early church?,Righteousness,ccel/s/schaff/anf01.xml:ii.ii.44-p1
+195,What do the early church fathers teach about charity?,Charity,ccel/s/schaff/anf01.xml:ii.ii.3-p1
+196,How was truth practiced in the early church?,Truth,ccel/s/schaff/anf01.xml:ii.ii.26-p1
+197,What do early writings reveal about resurrection?,Resurrection,ccel/s/schaff/anf01.xml:ii.ii.35-p1
+198,What do the early church fathers teach about church?,Church,ccel/s/schaff/anf01.xml:ii.ii.3-p1
+199,What does early theology say concerning wisdom?,Wisdom,ccel/s/schaff/anf01.xml:ii.ii.15-p1
+200,What does early theology say concerning church?,Church,ccel/s/schaff/anf01.xml:ii.ii.42-p1
+201,How is discipline understood in early Christian theology?,Discipline,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+202,What does early theology say concerning trinity?,Trinity,ccel/s/schaff/anf01.xml:ii.ii.47-p1
+203,How is truth understood in early Christian theology?,Truth,ccel/s/schaff/anf01.xml:ii.ii.29-p1
+204,What do the early church fathers teach about mercy?,Mercy,ccel/s/schaff/anf01.xml:ii.ii.13-p1
+205,What does early theology say concerning discipline?,Discipline,ccel/s/schaff/anf01.xml:ii.ii.18-p1
+206,What does early theology say concerning temptation?,Temptation,ccel/s/schaff/anf01.xml:ii.ii.31-p1
+207,What do the early church fathers teach about persecution?,Persecution,ccel/s/schaff/anf01.xml:ii.ii.15-p1
+208,How is faithfulness understood in early Christian theology?,Faithfulness,ccel/s/schaff/anf01.xml:ii.ii.21-p1
+209,What do the early church fathers teach about creation?,Creation,ccel/s/schaff/anf01.xml:ii.ii.33-p1
+210,What does early theology say concerning holiness?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.34-p1
+211,How is salvation understood in early Christian theology?,Salvation,ccel/s/schaff/anf01.xml:ii.ii.18-p1
+212,What does early theology say concerning repentance?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.7-p1
+213,What does early theology say concerning scripture?,Scripture,ccel/s/schaff/anf01.xml:ii.ii.18-p1
+214,What do the early church fathers teach about christology?,Christology,ccel/s/schaff/anf01.xml:ii.ii.28-p1
+215,What does early theology say concerning martyrdom?,Martyrdom,ccel/s/schaff/anf01.xml:ii.ii.43-p1
+216,What does early theology say concerning sacrifice?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.32-p1
+217,What do early writings reveal about idolatry?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.6-p1
+218,How was scripture practiced in the early church?,Scripture,ccel/s/schaff/anf01.xml:ii.ii.28-p1
+219,What do early writings reveal about creation?,Creation,ccel/s/schaff/anf01.xml:ii.ii.50-p1
+220,What does early theology say concerning trinity?,Trinity,ccel/s/schaff/anf01.xml:ii.ii.48-p1
+221,What do early writings reveal about discipline?,Discipline,ccel/s/schaff/anf01.xml:ii.ii.12-p1
+222,What does early theology say concerning justice?,Justice,ccel/s/schaff/anf01.xml:ii.ii.8-p1
+223,What does early theology say concerning sin?,Sin,ccel/s/schaff/anf01.xml:ii.ii.43-p1
+224,How was holiness practiced in the early church?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.5-p1
+225,What does early theology say concerning sin?,Sin,ccel/s/schaff/anf01.xml:ii.ii.31-p1
+226,What do early writings reveal about pride?,Pride,ccel/s/schaff/anf01.xml:ii.ii.34-p1
+227,How is baptism understood in early Christian theology?,Baptism,ccel/s/schaff/anf01.xml:ii.ii.42-p1
+228,What do the early church fathers teach about divine providence?,Divine Providence,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+229,How was love practiced in the early church?,Love,ccel/s/schaff/anf01.xml:ii.ii.37-p1
+230,What do the early church fathers teach about humility?,Humility,ccel/s/schaff/anf01.xml:ii.ii.12-p1
+231,How was love practiced in the early church?,Love,ccel/s/schaff/anf01.xml:ii.ii.41-p1
+232,How is demons understood in early Christian theology?,Demons,ccel/s/schaff/anf01.xml:ii.ii.1-p1
+233,What do early writings reveal about sacrifice?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.18-p1
+234,What do the early church fathers teach about holiness?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.1-p1
+235,What do early writings reveal about divine providence?,Divine Providence,ccel/s/schaff/anf01.xml:ii.ii.15-p1
+236,What does early theology say concerning humility?,Humility,ccel/s/schaff/anf01.xml:ii.ii.24-p1
+237,What do early writings reveal about christology?,Christology,ccel/s/schaff/anf01.xml:ii.ii.5-p1
+238,How was leadership practiced in the early church?,Leadership,ccel/s/schaff/anf01.xml:ii.ii.23-p1
+239,What does early theology say concerning discipline?,Discipline,ccel/s/schaff/anf01.xml:ii.ii.35-p1
+240,What does early theology say concerning persecution?,Persecution,ccel/s/schaff/anf01.xml:ii.ii.26-p1
+241,What do early writings reveal about love?,Love,ccel/s/schaff/anf01.xml:ii.ii.21-p1
+242,What does early theology say concerning church?,Church,ccel/s/schaff/anf01.xml:ii.ii.10-p1
+243,What do early writings reveal about martyrdom?,Martyrdom,ccel/s/schaff/anf01.xml:ii.ii.37-p1
+244,What do early writings reveal about obedience?,Obedience,ccel/s/schaff/anf01.xml:ii.ii.43-p1
+245,How was church practiced in the early church?,Church,ccel/s/schaff/anf01.xml:ii.ii.27-p1
+246,How is forgiveness understood in early Christian theology?,Forgiveness,ccel/s/schaff/anf01.xml:ii.ii.46-p1
+247,What do the early church fathers teach about repentance?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.28-p1
+248,What does early theology say concerning obedience?,Obedience,ccel/s/schaff/anf01.xml:ii.ii.32-p1
+249,How was baptism practiced in the early church?,Baptism,ccel/s/schaff/anf01.xml:ii.ii.6-p1
+250,What do early writings reveal about scripture?,Scripture,ccel/s/schaff/anf01.xml:ii.ii.49-p1
+251,How is idolatry understood in early Christian theology?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.1-p1
+252,How is pride understood in early Christian theology?,Pride,ccel/s/schaff/anf01.xml:ii.ii.30-p1
+253,How is virtue understood in early Christian theology?,Virtue,ccel/s/schaff/anf01.xml:ii.ii.33-p1
+254,How is salvation understood in early Christian theology?,Salvation,ccel/s/schaff/anf01.xml:ii.ii.40-p1
+255,How was discipline practiced in the early church?,Discipline,ccel/s/schaff/anf01.xml:ii.ii.18-p1
+256,What does early theology say concerning holiness?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.28-p1
+257,What do early writings reveal about hope?,Hope,ccel/s/schaff/anf01.xml:ii.ii.28-p1
+258,What do the early church fathers teach about pride?,Pride,ccel/s/schaff/anf01.xml:ii.ii.13-p1
+259,How was unity practiced in the early church?,Unity,ccel/s/schaff/anf01.xml:ii.ii.3-p1
+260,How was salvation practiced in the early church?,Salvation,ccel/s/schaff/anf01.xml:ii.ii.1-p1
+261,What do the early church fathers teach about martyrdom?,Martyrdom,ccel/s/schaff/anf01.xml:ii.ii.40-p1
+262,What do the early church fathers teach about divine providence?,Divine Providence,ccel/s/schaff/anf01.xml:ii.ii.48-p1
+263,What do early writings reveal about peace?,Peace,ccel/s/schaff/anf01.xml:ii.ii.13-p1
+264,How was truth practiced in the early church?,Truth,ccel/s/schaff/anf01.xml:ii.ii.44-p1
+265,How was holiness practiced in the early church?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.50-p1
+266,What does early theology say concerning obedience?,Obedience,ccel/s/schaff/anf01.xml:ii.ii.1-p1
+267,What do early writings reveal about martyrdom?,Martyrdom,ccel/s/schaff/anf01.xml:ii.ii.2-p1
+268,What do the early church fathers teach about righteousness?,Righteousness,ccel/s/schaff/anf01.xml:ii.ii.6-p1
+269,What do the early church fathers teach about church?,Church,ccel/s/schaff/anf01.xml:ii.ii.38-p1
+270,What do the early church fathers teach about christology?,Christology,ccel/s/schaff/anf01.xml:ii.ii.36-p1
+271,How is christology understood in early Christian theology?,Christology,ccel/s/schaff/anf01.xml:ii.ii.3-p1
+272,What does early theology say concerning demons?,Demons,ccel/s/schaff/anf01.xml:ii.ii.17-p1
+273,What does early theology say concerning mercy?,Mercy,ccel/s/schaff/anf01.xml:ii.ii.16-p1
+274,How was mercy practiced in the early church?,Mercy,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+275,What do the early church fathers teach about peace?,Peace,ccel/s/schaff/anf01.xml:ii.ii.36-p1
+276,How is courage understood in early Christian theology?,Courage,ccel/s/schaff/anf01.xml:ii.ii.47-p1
+277,How was purity practiced in the early church?,Purity,ccel/s/schaff/anf01.xml:ii.ii.32-p1
+278,How is discipline understood in early Christian theology?,Discipline,ccel/s/schaff/anf01.xml:ii.ii.28-p1
+279,What do the early church fathers teach about sacrifice?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.48-p1
+280,How is divine providence understood in early Christian theology?,Divine Providence,ccel/s/schaff/anf01.xml:ii.ii.8-p1
+281,What do the early church fathers teach about christology?,Christology,ccel/s/schaff/anf01.xml:ii.ii.8-p1
+282,How is resurrection understood in early Christian theology?,Resurrection,ccel/s/schaff/anf01.xml:ii.ii.41-p1
+283,What do the early church fathers teach about faith?,Faith,ccel/s/schaff/anf01.xml:ii.ii.48-p1
+284,What does early theology say concerning patience?,Patience,ccel/s/schaff/anf01.xml:ii.ii.9-p1
+285,What does early theology say concerning wisdom?,Wisdom,ccel/s/schaff/anf01.xml:ii.ii.43-p1
+286,How is faith understood in early Christian theology?,Faith,ccel/s/schaff/anf01.xml:ii.ii.15-p1
+287,How is sacrifice understood in early Christian theology?,Sacrifice,ccel/s/schaff/anf01.xml:ii.ii.7-p1
+288,What does early theology say concerning trinity?,Trinity,ccel/s/schaff/anf01.xml:ii.ii.22-p1
+289,What does early theology say concerning holiness?,Holiness,ccel/s/schaff/anf01.xml:ii.ii.12-p1
+290,What do early writings reveal about idolatry?,Idolatry,ccel/s/schaff/anf01.xml:ii.ii.18-p1
+291,What do the early church fathers teach about grace?,Grace,ccel/s/schaff/anf01.xml:ii.ii.22-p1
+292,What do early writings reveal about pride?,Pride,ccel/s/schaff/anf01.xml:ii.ii.47-p1
+293,What does early theology say concerning salvation?,Salvation,ccel/s/schaff/anf01.xml:ii.ii.4-p1
+294,What do early writings reveal about virtue?,Virtue,ccel/s/schaff/anf01.xml:ii.ii.31-p1
+295,How was repentance practiced in the early church?,Repentance,ccel/s/schaff/anf01.xml:ii.ii.21-p1
+296,What do early writings reveal about mercy?,Mercy,ccel/s/schaff/anf01.xml:ii.ii.7-p1
+297,What does early theology say concerning faithfulness?,Faithfulness,ccel/s/schaff/anf01.xml:ii.ii.37-p1
+298,How was salvation practiced in the early church?,Salvation,ccel/s/schaff/anf01.xml:ii.ii.25-p1
+299,What do the early church fathers teach about unity?,Unity,ccel/s/schaff/anf01.xml:ii.ii.33-p1
+300,How is hope understood in early Christian theology?,Hope,ccel/s/schaff/anf01.xml:ii.ii.13-p1

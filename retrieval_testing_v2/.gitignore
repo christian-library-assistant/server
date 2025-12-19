@@ -1,0 +1,16 @@
+# Generated output files
+output/*.csv
+output/*.json
+output/*.txt
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment files (keep .env.example if you create one)
+.env
+
+# OS files
+.DS_Store
+

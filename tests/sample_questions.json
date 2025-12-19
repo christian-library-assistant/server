@@ -1,0 +1,356 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-11-04",
+    "description": "Sample question bank for JETON testing (33 author + 33 work + 34 broad = 100 total)",
+    "note": "This is a starter set - expand to 100 questions for full testing"
+  },
+  "questions": [
+    {
+      "id": "author_001",
+      "scenario": "author",
+      "query": "What does Augustine say about original sin?",
+      "authors": ["augustine"],
+      "expected_author": "augustine",
+      "expected_topics": ["original sin", "adam", "fall"]
+    },
+    {
+      "id": "author_002",
+      "scenario": "author",
+      "query": "According to Augustine, what is grace?",
+      "authors": ["augustine"],
+      "expected_author": "augustine",
+      "expected_topics": ["grace", "salvation", "divine gift"]
+    },
+    {
+      "id": "author_003",
+      "scenario": "author",
+      "query": "How does Augustine explain the nature of time?",
+      "authors": ["augustine"],
+      "expected_author": "augustine",
+      "expected_topics": ["time", "eternity", "creation"]
+    },
+    {
+      "id": "author_004",
+      "scenario": "author",
+      "query": "What is Augustine's view on free will?",
+      "authors": ["augustine"],
+      "expected_author": "augustine",
+      "expected_topics": ["free will", "predestination", "choice"]
+    },
+    {
+      "id": "author_005",
+      "scenario": "author",
+      "query": "How does Augustine describe the Trinity?",
+      "authors": ["augustine"],
+      "expected_author": "augustine",
+      "expected_topics": ["trinity", "father son spirit", "three persons"]
+    },
+    {
+      "id": "author_006",
+      "scenario": "author",
+      "query": "What does Aquinas say about natural law?",
+      "authors": ["aquinas"],
+      "expected_author": "aquinas",
+      "expected_topics": ["natural law", "morality", "reason"]
+    },
+    {
+      "id": "author_007",
+      "scenario": "author",
+      "query": "According to Aquinas, what are the five ways to prove God's existence?",
+      "authors": ["aquinas"],
+      "expected_author": "aquinas",
+      "expected_topics": ["five ways", "cosmological argument", "teleological"]
+    },
+    {
+      "id": "author_008",
+      "scenario": "author",
+      "query": "How does Aquinas explain the relationship between faith and reason?",
+      "authors": ["aquinas"],
+      "expected_author": "aquinas",
+      "expected_topics": ["faith", "reason", "philosophy theology"]
+    },
+    {
+      "id": "author_009",
+      "scenario": "author",
+      "query": "What is Aquinas's view on virtue ethics?",
+      "authors": ["aquinas"],
+      "expected_author": "aquinas",
+      "expected_topics": ["virtue", "ethics", "cardinal virtues"]
+    },
+    {
+      "id": "author_010",
+      "scenario": "author",
+      "query": "How does Aquinas describe the nature of God?",
+      "authors": ["aquinas"],
+      "expected_author": "aquinas",
+      "expected_topics": ["divine nature", "attributes of god", "perfection"]
+    },
+    {
+      "id": "author_011",
+      "scenario": "author",
+      "query": "What does Calvin say about predestination?",
+      "authors": ["calvin"],
+      "expected_author": "calvin",
+      "expected_topics": ["predestination", "election", "sovereignty"]
+    },
+    {
+      "id": "author_012",
+      "scenario": "author",
+      "query": "According to Calvin, what is total depravity?",
+      "authors": ["calvin"],
+      "expected_author": "calvin",
+      "expected_topics": ["total depravity", "sin", "fallen nature"]
+    },
+    {
+      "id": "author_013",
+      "scenario": "author",
+      "query": "How does Calvin explain the sovereignty of God?",
+      "authors": ["calvin"],
+      "expected_author": "calvin",
+      "expected_topics": ["sovereignty", "providence", "divine will"]
+    },
+    {
+      "id": "author_014",
+      "scenario": "author",
+      "query": "What is Calvin's view on the sacraments?",
+      "authors": ["calvin"],
+      "expected_author": "calvin",
+      "expected_topics": ["sacraments", "baptism", "communion"]
+    },
+    {
+      "id": "author_015",
+      "scenario": "author",
+      "query": "How does Calvin describe the role of Scripture?",
+      "authors": ["calvin"],
+      "expected_author": "calvin",
+      "expected_topics": ["scripture", "bible", "revelation"]
+    },
+
+    {
+      "id": "work_001",
+      "scenario": "work",
+      "query": "What does the Confessions say about Augustine's conversion?",
+      "works": ["confessions"],
+      "expected_work": "confessions",
+      "expected_topics": ["conversion", "garden", "tolle lege"]
+    },
+    {
+      "id": "work_002",
+      "scenario": "work",
+      "query": "How is time described in the Confessions?",
+      "works": ["confessions"],
+      "expected_work": "confessions",
+      "expected_topics": ["time", "past present future", "memory"]
+    },
+    {
+      "id": "work_003",
+      "scenario": "work",
+      "query": "What does the Confessions say about memory?",
+      "works": ["confessions"],
+      "expected_work": "confessions",
+      "expected_topics": ["memory", "mind", "recollection"]
+    },
+    {
+      "id": "work_004",
+      "scenario": "work",
+      "query": "According to the Confessions, what is the nature of evil?",
+      "works": ["confessions"],
+      "expected_work": "confessions",
+      "expected_topics": ["evil", "privation", "good"]
+    },
+    {
+      "id": "work_005",
+      "scenario": "work",
+      "query": "What does the Confessions say about God's creation?",
+      "works": ["confessions"],
+      "expected_work": "confessions",
+      "expected_topics": ["creation", "genesis", "heaven earth"]
+    },
+    {
+      "id": "work_006",
+      "scenario": "work",
+      "query": "What does City of God say about the two cities?",
+      "works": ["city"],
+      "expected_work": "city",
+      "expected_topics": ["two cities", "earthly city", "city of god"]
+    },
+    {
+      "id": "work_007",
+      "scenario": "work",
+      "query": "How is the fall of Rome explained in City of God?",
+      "works": ["city"],
+      "expected_work": "city",
+      "expected_topics": ["rome", "fall", "barbarians"]
+    },
+    {
+      "id": "work_008",
+      "scenario": "work",
+      "query": "What does City of God say about divine providence?",
+      "works": ["city"],
+      "expected_work": "city",
+      "expected_topics": ["providence", "divine plan", "history"]
+    },
+    {
+      "id": "work_009",
+      "scenario": "work",
+      "query": "What does the Summa Theologica say about the essence of God?",
+      "works": ["summa"],
+      "expected_work": "summa",
+      "expected_topics": ["essence", "divine simplicity", "attributes"]
+    },
+    {
+      "id": "work_010",
+      "scenario": "work",
+      "query": "How are the sacraments explained in the Summa Theologica?",
+      "works": ["summa"],
+      "expected_work": "summa",
+      "expected_topics": ["sacraments", "grace", "signs"]
+    },
+    {
+      "id": "work_011",
+      "scenario": "work",
+      "query": "What does the Summa say about angels?",
+      "works": ["summa"],
+      "expected_work": "summa",
+      "expected_topics": ["angels", "spiritual beings", "hierarchy"]
+    },
+    {
+      "id": "work_012",
+      "scenario": "work",
+      "query": "What do the Institutes say about election?",
+      "works": ["institutes"],
+      "expected_work": "institutes",
+      "expected_topics": ["election", "predestination", "chosen"]
+    },
+    {
+      "id": "work_013",
+      "scenario": "work",
+      "query": "How is sanctification described in the Institutes?",
+      "works": ["institutes"],
+      "expected_work": "institutes",
+      "expected_topics": ["sanctification", "holiness", "spiritual growth"]
+    },
+    {
+      "id": "work_014",
+      "scenario": "work",
+      "query": "What do the Institutes say about church governance?",
+      "works": ["institutes"],
+      "expected_work": "institutes",
+      "expected_topics": ["church government", "elders", "presbytery"]
+    },
+    {
+      "id": "work_015",
+      "scenario": "work",
+      "query": "How is justification explained in the Institutes?",
+      "works": ["institutes"],
+      "expected_work": "institutes",
+      "expected_topics": ["justification", "faith", "righteousness"]
+    },
+
+    {
+      "id": "broad_001",
+      "scenario": "broad",
+      "query": "What is the Trinity?",
+      "expected_topics": ["trinity", "father son spirit", "three persons one god"]
+    },
+    {
+      "id": "broad_002",
+      "scenario": "broad",
+      "query": "What is salvation?",
+      "expected_topics": ["salvation", "redemption", "eternal life"]
+    },
+    {
+      "id": "broad_003",
+      "scenario": "broad",
+      "query": "What is grace?",
+      "expected_topics": ["grace", "unmerited favor", "divine gift"]
+    },
+    {
+      "id": "broad_004",
+      "scenario": "broad",
+      "query": "What is original sin?",
+      "expected_topics": ["original sin", "adam", "fall", "inherited sin"]
+    },
+    {
+      "id": "broad_005",
+      "scenario": "broad",
+      "query": "What is justification?",
+      "expected_topics": ["justification", "righteousness", "faith"]
+    },
+    {
+      "id": "broad_006",
+      "scenario": "broad",
+      "query": "What is the relationship between faith and works?",
+      "expected_topics": ["faith", "works", "james", "paul"]
+    },
+    {
+      "id": "broad_007",
+      "scenario": "broad",
+      "query": "How is the nature of God described in Christian theology?",
+      "expected_topics": ["divine nature", "attributes", "omnipotent omniscient"]
+    },
+    {
+      "id": "broad_008",
+      "scenario": "broad",
+      "query": "What is the purpose of the sacraments?",
+      "expected_topics": ["sacraments", "baptism", "communion", "means of grace"]
+    },
+    {
+      "id": "broad_009",
+      "scenario": "broad",
+      "query": "What is the role of the Holy Spirit?",
+      "expected_topics": ["holy spirit", "comforter", "sanctification"]
+    },
+    {
+      "id": "broad_010",
+      "scenario": "broad",
+      "query": "What is predestination?",
+      "expected_topics": ["predestination", "election", "foreknowledge"]
+    },
+    {
+      "id": "broad_011",
+      "scenario": "broad",
+      "query": "How is the incarnation explained?",
+      "expected_topics": ["incarnation", "word became flesh", "hypostatic union"]
+    },
+    {
+      "id": "broad_012",
+      "scenario": "broad",
+      "query": "What is atonement?",
+      "expected_topics": ["atonement", "sacrifice", "reconciliation"]
+    },
+    {
+      "id": "broad_013",
+      "scenario": "broad",
+      "query": "What is sanctification?",
+      "expected_topics": ["sanctification", "holiness", "transformation"]
+    },
+    {
+      "id": "broad_014",
+      "scenario": "broad",
+      "query": "What is the purpose of prayer?",
+      "expected_topics": ["prayer", "communion with god", "petition"]
+    },
+    {
+      "id": "broad_015",
+      "scenario": "broad",
+      "query": "How should Christians understand suffering?",
+      "expected_topics": ["suffering", "theodicy", "purpose of pain"]
+    },
+    {
+      "id": "broad_016",
+      "scenario": "broad",
+      "query": "What is the nature of the church?",
+      "expected_topics": ["church", "body of christ", "ecclesiology"]
+    },
+    {
+      "id": "broad_017",
+      "scenario": "broad",
+      "query": "What is Christian ethics based on?",
+      "expected_topics": ["ethics", "morality", "commandments"]
+    }
+  ]
+}
+
+
